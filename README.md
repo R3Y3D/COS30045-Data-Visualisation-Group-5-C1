@@ -13,8 +13,8 @@
 
 #### Team Members
 - **Ibrahim Mahbub** — `105684360`
-- **Darrshan Muraleesvaran** — `105965528`
-- **Nasrul Aman Abdul Rashid** — `105556595`
+- **Darrshan A/L Muraleesvaran** — `105965528`
+- **Nasrul Aman bin Abdul Rashid** — `105556595`
 
 ---
 
