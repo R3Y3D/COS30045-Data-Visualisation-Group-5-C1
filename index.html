@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Australian Road Crash Hospitalised Injuries Dashboard (2011–2021) | COS30045 Group 5</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,180 +12,274 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-
-  <aside class="app-sidebar" aria-label="Dashboard navigation">
-    <a class="sidebar-brand" href="#dashboard" aria-label="Road Safety dashboard home">
-      <span class="brand-mark material-symbols-outlined" aria-hidden="true">insights</span>
-      <span class="sidebar-brand-text">Road<span>Safety</span></span>
-      <span class="sidebar-tag">C1</span>
-    </a>
-    <div class="sidebar-section-label">Dashboard</div>
-    <nav class="sidebar-nav">
-      <a class="sidebar-link is-active" href="#dashboard"><span class="nav-icon material-symbols-outlined" aria-hidden="true">dashboard</span>Overview</a>
-      <a class="sidebar-link" href="#trendChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">show_chart</span>Annual trends</a>
-      <a class="sidebar-link" href="#stateChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">map</span>States &amp; territories</a>
-      <a class="sidebar-link" href="#roadUserChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">directions_bike</span>Road users</a>
-      <a class="sidebar-link" href="#remotenessChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">distance</span>Remoteness</a>
-      <a class="sidebar-link" href="#demographicsChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">groups</span>Demographics</a>
-      <a class="sidebar-link" href="#counterpartyChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">car_crash</span>Crash counterparties</a>
-    </nav>
-    <div class="sidebar-bottom">
-      <span class="sidebar-bottom-mark">AU</span>
-      <span><strong>Australia</strong><small>2011–2021 dataset</small></span>
-    </div>
-  </aside>
-
   <div class="dashboard-shell" id="dashboard">
 
-    <!-- Compact Top Header & Interactive Filter Bar -->
+    <!-- Header: brand (left) + dark curved tab bar (right) -->
     <header class="topbar">
       <div class="brand-block">
-        <h1 class="brand-title">Non-Fatal Hospitalised Injuries from Road Crashes in Australia (2011–2021)</h1>
-        <p class="brand-subtitle">COS30045 Data Visualisation &mdash; Group 5 (C1) &bull; Data: <code>Data/Cleaned_CSV_Files/</code> (BITRE &amp; AIHW NHMD)</p>
+        <img class="brand-logo" src="assets/logo.png" alt="Road crash hospitalised injuries dashboard logo">
+        <div class="brand-text">
+          <h1 class="brand-title">Road crash hospitalised injuries dashboard</h1>
+          <p class="brand-subtitle">COS30045 &bull; Group 5 (C1) &bull; BITRE &amp; AIHW NHMD &bull; 2011–2021</p>
+        </div>
       </div>
 
-      <div class="controls-bar">
-        <div class="control-item">
-          <label for="filterMetric">Metric</label>
-          <select id="filterMetric">
-            <option value="hospitalisations">Hospitalisations (Cases)</option>
-            <option value="bed_days">Hospital Bed Days</option>
-          </select>
-        </div>
-
-        <div class="control-item">
-          <label for="filterYear">Year</label>
-          <select id="filterYear">
-            <option value="All">All Years (2011–2021)</option>
-          </select>
-        </div>
-
-        <div class="control-item">
-          <label for="filterState">Jurisdiction</label>
-          <select id="filterState">
-            <option value="All">All States</option>
-          </select>
-        </div>
-
-        <button type="button" class="btn-reset" id="resetFiltersBtn">Reset</button>
-      </div>
+      <nav class="tabbar" aria-label="Dashboard views">
+        <a class="tab is-active" href="#overview" data-view="overview">Overview</a>
+        <a class="tab" href="#states" data-view="states">States</a>
+        <a class="tab" href="#roadusers" data-view="roadusers">Road users</a>
+        <a class="tab" href="#regions" data-view="regions">Regions</a>
+        <a class="tab" href="#demographics" data-view="demographics">Demographics</a>
+        <button type="button" class="btn-reset" id="resetFiltersBtn">Reset filters</button>
+      </nav>
     </header>
 
-    <!-- KPI Summary Strip -->
-    <section class="kpi-strip" aria-label="Key Performance Indicators">
-      <div class="kpi-card">
-        <div class="kpi-top">
-          <span class="kpi-label">Total Traffic Hospitalisations</span>
-          <span class="kpi-value" id="kpiHospitalisations">410,884</span>
-        </div>
-        <div class="kpi-sub" id="kpiHospitalisationsSub">11-year national total (2011–2021)</div>
+    <!-- Filters -->
+    <section class="controls-bar" aria-label="Filters">
+      <div class="control-item">
+        <label for="filterMetric">Metric</label>
+        <select id="filterMetric">
+          <option value="hospitalisations">Hospitalisations (Cases)</option>
+          <option value="bed_days">Hospital Bed Days</option>
+        </select>
       </div>
-
-      <div class="kpi-card kpi-bed">
-        <div class="kpi-top">
-          <span class="kpi-label">Total Hospital Bed Days</span>
-          <span class="kpi-value" id="kpiBedDays">2,018,891</span>
-        </div>
-        <div class="kpi-sub" id="kpiBedDaysSub">Avg. 183,536 bed days / year</div>
+      <div class="control-item">
+        <label for="filterYear">Year</label>
+        <select id="filterYear">
+          <option value="All">All Years (2011–2021)</option>
+        </select>
       </div>
-
-      <div class="kpi-card kpi-alos">
-        <div class="kpi-top">
-          <span class="kpi-label">Avg. Length of Stay (ALOS)</span>
-          <span class="kpi-value" id="kpiAlos">4.91 days</span>
-        </div>
-        <div class="kpi-sub" id="kpiAlosSub">Mean hospital stay per admission</div>
-      </div>
-
-      <div class="kpi-card kpi-change">
-        <div class="kpi-top">
-          <span class="kpi-label">11-Year Change (2011 &rarr; 2021)</span>
-          <span class="kpi-value" id="kpiChange">+16.1%</span>
-        </div>
-        <div class="kpi-sub" id="kpiChangeSub">Hospitalisations: 34,033 (2011) &rarr; 39,505 (2021)</div>
+      <div class="control-item">
+        <label for="filterState">Jurisdiction</label>
+        <select id="filterState">
+          <option value="All">All States</option>
+        </select>
       </div>
     </section>
 
-    <!-- 2x3 Non-Scrolling D3.js Chart Grid -->
+    <!-- KPI gradient cards -->
+    <section class="kpi-strip" aria-label="Key Performance Indicators">
+      <div class="kpi-card kpi-1">
+        <span class="kpi-label">Hospitalisations</span>
+        <span class="kpi-value" id="kpiHospitalisations">410,884</span>
+        <span class="kpi-sub" id="kpiHospitalisationsSub">11-year national total</span>
+      </div>
+      <div class="kpi-card kpi-2">
+        <span class="kpi-label">Bed days</span>
+        <span class="kpi-value" id="kpiBedDays">2,018,891</span>
+        <span class="kpi-sub" id="kpiBedDaysSub">Avg. 183,536 / year</span>
+      </div>
+      <div class="kpi-card kpi-3">
+        <span class="kpi-label">Avg. length of stay</span>
+        <span class="kpi-value" id="kpiAlos">4.91 days</span>
+        <span class="kpi-sub" id="kpiAlosSub">Mean stay per admission</span>
+      </div>
+      <div class="kpi-card kpi-4">
+        <span class="kpi-label">Change 2011 &rarr; 2021</span>
+        <span class="kpi-value" id="kpiChange">+16.1%</span>
+        <span class="kpi-sub" id="kpiChangeSub">34,033 &rarr; 39,505</span>
+      </div>
+      <div class="kpi-card kpi-5">
+        <span class="kpi-label">Peak year</span>
+        <span class="kpi-value" id="kpiPeak">2019</span>
+        <span class="kpi-sub" id="kpiPeakSub">39,866</span>
+      </div>
+      <div class="kpi-card kpi-6">
+        <span class="kpi-label">Top road user</span>
+        <span class="kpi-value" id="kpiTopUser">Car driver</span>
+        <span class="kpi-sub" id="kpiTopUserSub">32.9% of total</span>
+      </div>
+      <div class="kpi-card kpi-7">
+        <span class="kpi-label">Top jurisdiction</span>
+        <span class="kpi-value" id="kpiTopState">NSW</span>
+        <span class="kpi-sub" id="kpiTopStateSub">Largest share</span>
+      </div>
+    </section>
+
+    <!-- Chart grid -->
     <main class="charts-grid">
 
-      <!-- Chart 1: National Annual Trajectory -->
-      <div class="chart-card">
+      <div class="chart-card" id="card-trend">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">1. National Annual Trajectory (2011–2021)</h2>
-            <p class="chart-subtitle">Source: <code>national_annual.csv</code> &bull; Click any point to filter year</p>
+            <h2 class="chart-title">National annual trajectory</h2>
+            <p class="chart-subtitle">Click a bar to filter by year</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
         <div id="trendChart" class="svg-container"></div>
       </div>
 
-      <!-- Chart 2: State & Territory Breakdown -->
-      <div class="chart-card">
+      <div class="chart-card" id="card-state">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">2. State &amp; Territory Comparison</h2>
-            <p class="chart-subtitle">Source: <code>Temporal Trends &amp; State Comparisons.csv</code></p>
+            <h2 class="chart-title">State &amp; territory comparison</h2>
+            <p class="chart-subtitle">Click a bar to highlight a jurisdiction</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
         <div id="stateChart" class="svg-container"></div>
       </div>
 
-      <!-- Chart 3: Road User Vulnerability -->
-      <div class="chart-card">
+      <div class="chart-card" id="card-roaduser">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">3. Road User Vulnerability</h2>
-            <p class="chart-subtitle">Source: <code>road_user_annual.csv</code> / <code>age_group_summary.csv</code></p>
+            <h2 class="chart-title">Road user vulnerability</h2>
+            <p class="chart-subtitle">Top 7 road user categories</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
         <div id="roadUserChart" class="svg-container"></div>
       </div>
 
-      <!-- Chart 4: ABS Remoteness Area Trends -->
-      <div class="chart-card">
+      <div class="chart-card" id="card-counterparty">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">4. ABS Remoteness Area Trends</h2>
-          <p class="chart-subtitle">Major Cities, Regional and Remote; missing-area records are excluded from these lines.</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations | 2011–2021</span>
-        </div>
-        <div id="remotenessChart" class="svg-container"></div>
-        <div id="remotenessLegend" class="chart-legend"></div>
-      </div>
-
-      <!-- Chart 5: Age Group & Sex Profile -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">5. Age Group &amp; Biological Sex Profile</h2>
-          <p class="chart-subtitle">Age and sex totals; missing and unclassified categories are retained.</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations</span>
-        </div>
-        <div id="demographicsChart" class="svg-container"></div>
-        <div id="demographicsLegend" class="chart-legend"></div>
-      </div>
-
-      <!-- Chart 6: Crash Counterparty Analysis -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">6. Crash Counterparty Analysis</h2>
-            <p class="chart-subtitle">Source: <code>Counterparty Analysis.csv</code></p>
+            <h2 class="chart-title">Crash counterparty analysis</h2>
+            <p class="chart-subtitle">What the vehicle collided with</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
         <div id="counterpartyChart" class="svg-container"></div>
       </div>
 
+      <div class="chart-card" id="card-remoteness">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">ABS remoteness area trends</h2>
+            <p class="chart-subtitle">Missing-area records are excluded from the lines</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations | 2011–2021</span>
+        </div>
+        <div id="remotenessLegend" class="chart-legend"></div>
+        <div id="remotenessChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-demographics">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Age group &amp; biological sex profile</h2>
+            <p class="chart-subtitle">Missing and unclassified categories are retained</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="demographicsLegend" class="chart-legend"></div>
+        <div id="demographicsChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-sex-trend">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Male vs female by year</h2>
+            <p class="chart-subtitle">Grouped by year &bull; click a bar pair to filter</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="sexTrendLegend" class="chart-legend"></div>
+        <div id="sexTrendChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-alos">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Average length of stay by year</h2>
+            <p class="chart-subtitle">Bed days per hospitalisation &bull; dashed line = 11-year average</p>
+          </div>
+          <span class="chart-badge ">Days per admission</span>
+        </div>
+        <div id="alosChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-annual-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Year-by-year summary</h2>
+            <p class="chart-subtitle">Click a heading to sort &bull; click a row to filter</p>
+          </div>
+          <span class="chart-badge ">2011–2021</span>
+        </div>
+        <div id="annualTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-state-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">State &amp; territory breakdown</h2>
+            <p class="chart-subtitle">Click a heading to sort &bull; click a row to filter</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="stateTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-roaduser-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Road user breakdown</h2>
+            <p class="chart-subtitle">Click a column heading to sort</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="roadUserTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-counterparty-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Counterparty breakdown</h2>
+            <p class="chart-subtitle">Click a column heading to sort</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="counterpartyTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-remoteness-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Remoteness breakdown</h2>
+            <p class="chart-subtitle">Click a heading to sort &bull; click a row to filter</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="remotenessTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-age-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Age group breakdown</h2>
+            <p class="chart-subtitle">Click a column heading to sort</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="ageTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-sex-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Biological sex breakdown</h2>
+            <p class="chart-subtitle">Click a column heading to sort</p>
+          </div>
+          <span class="chart-badge scope-badge">2011–2021</span>
+        </div>
+        <div id="sexTable" class="table-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-movers-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Biggest changes by road user</h2>
+            <p class="chart-subtitle">Change between 2011 and 2021 &bull; click a heading to sort</p>
+          </div>
+          <span class="chart-badge ">2011 vs 2021</span>
+        </div>
+        <div id="moversTable" class="table-container"></div>
+      </div>
+
     </main>
 
-    <!-- Single-line Footer -->
     <footer class="footer-bar">
       <span><strong>COS30045 Group 5 (C1):</strong> Ibrahim Mahbub (105684360) &bull; Darrshan A/L Muraleesvaran (105965528) &bull; Nasrul Aman bin Abdul Rashid (105556595)</span>
       <span>Counts show hospitalisation burden, not exposure-adjusted risk. NSW/Victoria reporting changes and 2020 mobility restrictions affect comparisons.</span>
@@ -192,7 +287,6 @@
 
   </div>
 
-  <!-- D3.js v7 & Dashboard Scripts -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="js/data-fallback.js"></script>
   <script src="js/shared-constants.js"></script>
@@ -202,6 +296,8 @@
   <script src="js/remoteness-chart.js"></script>
   <script src="js/demographics-chart.js"></script>
   <script src="js/counterparty-chart.js"></script>
+  <script src="js/overview-charts.js"></script>
+  <script src="js/tables.js"></script>
   <script src="js/load-data.js"></script>
 </body>
 </html>

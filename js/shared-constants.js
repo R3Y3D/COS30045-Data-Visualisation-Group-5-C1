@@ -19,37 +19,39 @@ const appState = {
   counterpartyAnnual: []  // Counterparty Analysis.csv
 };
 
+// Palette taken from the reference dashboard (navy / sky blue / teal / purple / pink)
 const COLORS = {
-  primary: "#2563eb",
-  bedDays: "#0d9488",
-  highlight: "#e11d48",
-  amber: "#d97706",
-  purple: "#7c3aed",
+  primary: "#0a63b8",
+  sky: "#33b1f0",
+  bedDays: "#00a0b8",
+  highlight: "#e0557a",
+  amber: "#f0a030",
+  purple: "#5b2ea6",
   slate: "#64748b",
   remoteness: {
-    "Major Cities": "#2563eb",
-    "Regional": "#0d9488",
-    "Remote": "#d97706",
-    "Missing": "#94a3b8"
+    "Major Cities": "#0a63b8",
+    "Regional": "#33b1f0",
+    "Remote": "#5b2ea6",
+    "Missing": "#9aa8bd"
   },
   sex: {
-    "Male": "#2563eb",
-    "Female": "#e11d48"
+    "Male": "#0a63b8",
+    "Female": "#d9507b"
   },
   statePalette: {
-    "NSW": "#1d4ed8",
-    "Vic": "#0d9488",
-    "Qld": "#d97706",
-    "WA": "#7c3aed",
-    "SA": "#0284c7",
-    "Tas": "#059669",
-    "NT": "#e11d48",
-    "ACT": "#4f46e5"
+    "NSW": "#0a63b8",
+    "Vic": "#33b1f0",
+    "Qld": "#00a0b8",
+    "WA": "#5b2ea6",
+    "SA": "#7b5fd0",
+    "Tas": "#1f8fd6",
+    "NT": "#3d4fc4",
+    "ACT": "#0f7f95"
   },
   palette: [
-    "#1d4ed8", "#2563eb", "#0d9488", "#0284c7",
-    "#d97706", "#7c3aed", "#4f46e5", "#059669",
-    "#e11d48", "#475569", "#64748b", "#94a3b8"
+    "#0a63b8", "#33b1f0", "#00a0b8", "#5b2ea6",
+    "#7b5fd0", "#1f8fd6", "#3d4fc4", "#0f7f95",
+    "#d9507b", "#64748b", "#94a3b8", "#b8c4d6"
   ]
 };
 
