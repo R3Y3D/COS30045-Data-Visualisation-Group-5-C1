@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Australian Road Crash Hospitalised Injuries Dashboard (2011–2021) | COS30045 Group 5</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="dashboard-shell">
+
+    <!-- Compact Top Header & Interactive Filter Bar -->
+    <header class="topbar">
+      <div class="brand-block">
+        <h1 class="brand-title">Non-Fatal Hospitalised Injuries from Road Crashes in Australia (2011–2021)</h1>
+        <p class="brand-subtitle">COS30045 Data Visualisation &mdash; Group 5 (C1) &bull; Data: <code>Data/Cleaned_CSV_Files/</code> (BITRE &amp; AIHW NHMD)</p>
+      </div>
+
+      <div class="controls-bar">
+        <div class="control-item">
+          <label for="filterMetric">Metric</label>
+          <select id="filterMetric">
+            <option value="hospitalisations">Hospitalisations (Cases)</option>
+            <option value="bed_days">Hospital Bed Days</option>
+          </select>
+        </div>
+
+        <div class="control-item">
+          <label for="filterYear">Year</label>
+          <select id="filterYear">
+            <option value="All">All Years (2011–2021)</option>
+          </select>
+        </div>
+
+        <div class="control-item">
+          <label for="filterState">Jurisdiction</label>
+          <select id="filterState">
+            <option value="All">All States</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn-reset" id="resetFiltersBtn">Reset</button>
+      </div>
+    </header>
+
+    <!-- KPI Summary Strip -->
+    <section class="kpi-strip" aria-label="Key Performance Indicators">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Total Traffic Hospitalisations</span>
+          <span class="kpi-value" id="kpiHospitalisations">410,884</span>
+        </div>
+        <div class="kpi-sub" id="kpiHospitalisationsSub">11-year national total (2011–2021)</div>
+      </div>
+
+      <div class="kpi-card kpi-bed">
+        <div class="kpi-top">
+          <span class="kpi-label">Total Hospital Bed Days</span>
+          <span class="kpi-value" id="kpiBedDays">2,018,891</span>
+        </div>
+        <div class="kpi-sub" id="kpiBedDaysSub">Avg. 183,536 bed days / year</div>
+      </div>
+
+      <div class="kpi-card kpi-alos">
+        <div class="kpi-top">
+          <span class="kpi-label">Avg. Length of Stay (ALOS)</span>
+          <span class="kpi-value" id="kpiAlos">4.91 days</span>
+        </div>
+        <div class="kpi-sub" id="kpiAlosSub">Mean hospital stay per admission</div>
+      </div>
+
+      <div class="kpi-card kpi-change">
+        <div class="kpi-top">
+          <span class="kpi-label">11-Year Change (2011 &rarr; 2021)</span>
+          <span class="kpi-value" id="kpiChange">+16.1%</span>
+        </div>
+        <div class="kpi-sub" id="kpiChangeSub">Hospitalisations: 34,033 (2011) &rarr; 39,505 (2021)</div>
+      </div>
+    </section>
+
+    <!-- 2x3 Non-Scrolling D3.js Chart Grid -->
+    <main class="charts-grid">
+
+      <!-- Chart 1: National Annual Trajectory -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">1. National Annual Trajectory (2011–2021)</h2>
+            <p class="chart-subtitle">Source: <code>national_annual.csv</code> &bull; Click any point to filter year</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="trendChart" class="svg-container"></div>
+      </div>
+
+      <!-- Chart 2: State & Territory Breakdown -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">2. State &amp; Territory Comparison</h2>
+            <p class="chart-subtitle">Source: <code>Temporal Trends &amp; State Comparisons.csv</code></p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="stateChart" class="svg-container"></div>
+      </div>
+
+      <!-- Chart 3: Road User Vulnerability -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">3. Road User Vulnerability</h2>
+            <p class="chart-subtitle">Source: <code>road_user_annual.csv</code> / <code>age_group_summary.csv</code></p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="roadUserChart" class="svg-container"></div>
+      </div>
+
+      <!-- Chart 4: ABS Remoteness Area Trends -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">4. ABS Remoteness Area Trends</h2>
+            <p class="chart-subtitle">Source: <code>remoteness_yearly_trends.csv</code> (Major Cities, Regional, Remote)</p>
+          </div>
+          <span class="chart-badge">Cases by Region</span>
+        </div>
+        <div id="remotenessChart" class="svg-container"></div>
+        <div id="remotenessLegend" class="chart-legend"></div>
+      </div>
+
+      <!-- Chart 5: Age Group & Sex Profile -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">5. Age Group &amp; Biological Sex Profile</h2>
+            <p class="chart-subtitle">Source: <code>Age Group Demographics.csv</code> &amp; <code>Gender_demographic_summary.csv</code></p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="demographicsChart" class="svg-container"></div>
+        <div id="demographicsLegend" class="chart-legend"></div>
+      </div>
+
+      <!-- Chart 6: Crash Counterparty Analysis -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">6. Crash Counterparty Analysis</h2>
+            <p class="chart-subtitle">Source: <code>Counterparty Analysis.csv</code></p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="counterpartyChart" class="svg-container"></div>
+      </div>
+
+    </main>
+
+    <!-- Single-line Footer -->
+    <footer class="footer-bar">
+      <span><strong>COS30045 Group 5 (C1):</strong> Ibrahim Mahbub (105684360) &bull; Darrshan A/L Muraleesvaran (105965528) &bull; Nasrul Aman bin Abdul Rashid (105556595)</span>
+      <span>Note: Mid-2017 NSW administrative reporting break &amp; 2020 COVID-19 mobility dip affect longitudinal comparisons.</span>
+    </footer>
+
+  </div>
+
+  <!-- D3.js v7 & Dashboard Scripts -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/data-fallback.js"></script>
+  <script src="js/shared-constants.js"></script>
+  <script src="js/trend-chart.js"></script>
+  <script src="js/state-chart.js"></script>
+  <script src="js/road-user-chart.js"></script>
+  <script src="js/remoteness-chart.js"></script>
+  <script src="js/demographics-chart.js"></script>
+  <script src="js/counterparty-chart.js"></script>
+  <script src="js/load-data.js"></script>
+</body>
+</html>
