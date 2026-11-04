@@ -63,6 +63,53 @@ function parseCounterpartyRow(d) {
   };
 }
 
+// --- First Nations Parsers ---
+function parseFnAnnualRow(d) {
+  return {
+    "Calendar year": +d["Calendar year"],
+    "First Nations peoples": +d["First Nations peoples"],
+    "Non-Indigenous Australians": +d["Non-Indigenous Australians"],
+    "Total": +d["Total"]
+  };
+}
+
+function parseFnRoadUserRow(d) {
+  const row = {
+    "Calendar year": +d["Calendar year"],
+    "Indigenous_status": d["Indigenous_status"]
+  };
+  Object.keys(d).forEach(key => {
+    if (key !== "Calendar year" && key !== "Indigenous_status") {
+      row[key] = +d[key] || 0;
+    }
+  });
+  return row;
+}
+
+function parseFnAgeRow(d) {
+  const row = {
+    "Calendar year": +d["Calendar year"],
+    "Indigenous_status": d["Indigenous_status"]
+  };
+  Object.keys(d).forEach(key => {
+    if (key !== "Calendar year" && key !== "Indigenous_status") {
+      row[key] = +d[key] || 0;
+    }
+  });
+  return row;
+}
+
+function parseFnRemotenessRow(d) {
+  return {
+    "Calendar year": +d["Calendar year"],
+    "Total": +d["Total"],
+    "Major Cities": +d["Major Cities"],
+    "Regional": +d["Regional"],
+    "Remote": +d["Remote"],
+    "Indigenous_status": d["Indigenous_status"]
+  };
+}
+
 function populateFilterOptions() {
   const years = appState.nationalAnnual.map(d => d.year).sort(d3.ascending);
   const yearSelect = d3.select("#filterYear");
@@ -107,7 +154,6 @@ function syncFilterControls() {
   d3.select("#filterState").property("value", appState.selectedState);
 }
 
-// Returns { key, value, share } of the largest group for the current metric
 function topGroup(rows, keyField) {
   const metric = appState.metric;
   const grouped = d3.rollup(rows, v => d3.sum(v, d => d[metric]), d => d[keyField]);
@@ -153,12 +199,10 @@ function updateKPIs() {
   d3.select("#kpiChange").text(`${formatPercent(pctChange)}%`);
   d3.select("#kpiChangeSub").text(`${formatNumber(v2011)} → ${formatNumber(v2021)}`);
 
-  // Peak year (always across all years, for the selected metric)
   const peak = d3.greatest(appState.nationalAnnual, d => d[metric]);
   d3.select("#kpiPeak").text(peak ? peak.year : "–");
   d3.select("#kpiPeakSub").text(peak ? `${formatNumber(peak[metric])} ${getMetricLabel(metric).toLowerCase()}` : "");
 
-  // Top road user and top jurisdiction (respect the year filter)
   const topUser = topGroup(filterByYear(appState.roadUserAnnual), "road_user");
   d3.select("#kpiTopUser").text(topUser.key);
   d3.select("#kpiTopUserSub").text(`${topUser.share.toFixed(1)}% of total`);
@@ -172,8 +216,6 @@ function updateKPIs() {
   d3.selectAll(".scope-badge").text(scopeLabel);
 }
 
-// Each draw runs on its own, so one failure can't blank the rest of the dashboard.
-// A failing card shows its error message instead of staying empty.
 const DRAW_STEPS = [
   ["drawTrendChart", ["trendChart"], "js/trend-chart.js"],
   ["drawStateChart", ["stateChart"], "js/state-chart.js"],
@@ -183,7 +225,8 @@ const DRAW_STEPS = [
   ["drawCounterpartyChart", ["counterpartyChart"], "js/counterparty-chart.js"],
   ["drawSexTrendChart", ["sexTrendChart"], "js/overview-charts.js"],
   ["drawAlosChart", ["alosChart"], "js/overview-charts.js"],
-  ["drawTables", ["annualTable", "moversTable", "stateTable", "roadUserTable", "counterpartyTable", "remotenessTable", "ageTable", "sexTable"], "js/tables.js"]
+  ["drawTables", ["annualTable", "moversTable", "stateTable", "roadUserTable", "counterpartyTable", "remotenessTable", "ageTable", "sexTable"], "js/tables.js"],
+  ["drawFnCharts", ["fnAnnualChart", "fnRemotenessChart", "fnRoadUserChart", "fnAgeChart"], "js/first-nations-charts.js"]
 ];
 
 function showDrawError(containerIds, message) {
@@ -213,13 +256,13 @@ function updateDashboard() {
   });
 }
 
-// ---------- Header tabs = separate views ----------
 const VIEWS = {
   overview:     ["card-trend", "card-sex-trend", "card-alos", "card-annual-table", "card-movers-table"],
   states:       ["card-state", "card-state-table"],
   roadusers:    ["card-roaduser", "card-counterparty", "card-roaduser-table", "card-counterparty-table"],
   regions:      ["card-remoteness", "card-remoteness-table"],
-  demographics: ["card-demographics", "card-age-table", "card-sex-table"]
+  demographics: ["card-demographics", "card-age-table", "card-sex-table"],
+  firstnations: ["card-fn-annual", "card-fn-remoteness", "card-fn-roaduser", "card-fn-age"]
 };
 
 function setView(view, updateHash = true) {
@@ -232,14 +275,12 @@ function setView(view, updateHash = true) {
     d3.select(this)
       .classed("is-hidden", !show)
       .classed("is-solo", show && ids.length === 1)
-      // odd number of cards: first one spans the full width
       .classed("is-wide", show && ids.length > 1 && ids.length % 2 === 1 && this.id === ids[0]);
   });
   d3.selectAll(".tab").classed("is-active", function () { return this.dataset.view === view; });
   if (updateHash) history.replaceState(null, "", "#" + view);
 }
 
-// ---------- Expandable charts ----------
 let backdropEl = null;
 
 function closeExpanded() {
@@ -312,9 +353,13 @@ Promise.all([
   d3.csv(CSV_DIR + "remoteness_yearly_trends.csv", parseRemotenessRow),
   d3.csv(CSV_DIR + "age_group_summary.csv", parseAgeGroupRow),
   d3.csv(CSV_DIR + "Gender_demographic_summary.csv", parseGenderRow),
-  d3.csv(CSV_DIR + "Counterparty Analysis.csv", parseCounterpartyRow)
+  d3.csv(CSV_DIR + "Counterparty Analysis.csv", parseCounterpartyRow),
+  d3.csv(CSV_DIR + "first_nations_annual_comparison_t1.csv", parseFnAnnualRow),
+  d3.csv(CSV_DIR + "first_nations_road_user.csv", parseFnRoadUserRow),
+  d3.csv(CSV_DIR + "first_nations_age_group.csv", parseFnAgeRow),
+  d3.csv(CSV_DIR + "first_nations_remoteness.csv", parseFnRemotenessRow)
 ])
-  .then(([nat, state, roadUser, remoteness, ageGroup, gender, counterparty]) => {
+  .then(([nat, state, roadUser, remoteness, ageGroup, gender, counterparty, fnAnn, fnRu, fnAge, fnRem]) => {
     bootDashboard({
       nationalAnnual: nat,
       stateAnnual: state,
@@ -322,23 +367,13 @@ Promise.all([
       remotenessAnnual: remoteness,
       ageGroupAnnual: ageGroup,
       genderAnnual: gender,
-      counterpartyAnnual: counterparty
+      counterpartyAnnual: counterparty,
+      fnAnnual: fnAnn,
+      fnRoadUser: fnRu,
+      fnAge: fnAge,
+      fnRemoteness: fnRem
     });
   })
   .catch(err => {
-    console.warn("Using fallback from js/data-fallback.js:", err);
-    if (!window.CLEANED_CSV_FALLBACK) {
-      console.error("No fallback data found. Is js/data-fallback.js linked in index.html?");
-      return;
-    }
-    const fb = window.CLEANED_CSV_FALLBACK;
-    bootDashboard({
-      nationalAnnual: fb["national_annual.csv"].map(d => parseNationalRow(d)),
-      stateAnnual: fb["Temporal Trends & State Comparisons.csv"].map(d => parseStateRow(d)),
-      roadUserAnnual: fb["road_user_summary.csv"].map(d => parseRoadUserRow(d)),
-      remotenessAnnual: fb["remoteness_yearly_trends.csv"].map(d => parseRemotenessRow(d)),
-      ageGroupAnnual: fb["age_group_summary.csv"].map(d => parseAgeGroupRow(d)),
-      genderAnnual: fb["Gender_demographic_summary.csv"].map(d => parseGenderRow(d)),
-      counterpartyAnnual: fb["Counterparty Analysis.csv"].map(d => parseCounterpartyRow(d))
-    });
+    console.error("Error loading CSV files:", err);
   });

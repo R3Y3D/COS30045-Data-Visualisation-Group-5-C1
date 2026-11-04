@@ -16,7 +16,12 @@ const appState = {
   remotenessAnnual: [],   // remoteness_yearly_trends.csv
   ageGroupAnnual: [],     // age_group_summary.csv
   genderAnnual: [],       // Gender_demographic_summary.csv
-  counterpartyAnnual: []  // Counterparty Analysis.csv
+  counterpartyAnnual: [], // Counterparty Analysis.csv
+  fnAnnual: [],
+  fnRoadUser: [],
+  fnAge: [],
+  fnRemoteness: [],
+  fnCounterparty: []
 };
 
 // Palette taken from the reference dashboard (navy / sky blue / teal / purple / pink)

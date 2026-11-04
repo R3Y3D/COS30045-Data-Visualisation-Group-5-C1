@@ -30,6 +30,7 @@
         <a class="tab" href="#roadusers" data-view="roadusers">Road users</a>
         <a class="tab" href="#regions" data-view="regions">Regions</a>
         <a class="tab" href="#demographics" data-view="demographics">Demographics</a>
+        <a class="tab" href="#firstnations" data-view="firstnations">First Nations</a>
         <button type="button" class="btn-reset" id="resetFiltersBtn">Reset filters</button>
       </nav>
     </header>
@@ -99,6 +100,7 @@
     <!-- Chart grid -->
     <main class="charts-grid">
 
+      <!-- Overview Cards -->
       <div class="chart-card" id="card-trend">
         <div class="chart-header">
           <div>
@@ -108,63 +110,6 @@
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
         <div id="trendChart" class="svg-container"></div>
-      </div>
-
-      <div class="chart-card" id="card-state">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">State &amp; territory comparison</h2>
-            <p class="chart-subtitle">Click a bar to highlight a jurisdiction</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations</span>
-        </div>
-        <div id="stateChart" class="svg-container"></div>
-      </div>
-
-      <div class="chart-card" id="card-roaduser">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">Road user vulnerability</h2>
-            <p class="chart-subtitle">Top 7 road user categories</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations</span>
-        </div>
-        <div id="roadUserChart" class="svg-container"></div>
-      </div>
-
-      <div class="chart-card" id="card-counterparty">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">Crash counterparty analysis</h2>
-            <p class="chart-subtitle">What the vehicle collided with</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations</span>
-        </div>
-        <div id="counterpartyChart" class="svg-container"></div>
-      </div>
-
-      <div class="chart-card" id="card-remoteness">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">ABS remoteness area trends</h2>
-            <p class="chart-subtitle">Missing-area records are excluded from the lines</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations | 2011–2021</span>
-        </div>
-        <div id="remotenessLegend" class="chart-legend"></div>
-        <div id="remotenessChart" class="svg-container"></div>
-      </div>
-
-      <div class="chart-card" id="card-demographics">
-        <div class="chart-header">
-          <div>
-            <h2 class="chart-title">Age group &amp; biological sex profile</h2>
-            <p class="chart-subtitle">Missing and unclassified categories are retained</p>
-          </div>
-          <span class="chart-badge metric-badge">Hospitalisations</span>
-        </div>
-        <div id="demographicsLegend" class="chart-legend"></div>
-        <div id="demographicsChart" class="svg-container"></div>
       </div>
 
       <div class="chart-card" id="card-sex-trend">
@@ -201,6 +146,29 @@
         <div id="annualTable" class="table-container"></div>
       </div>
 
+      <div class="chart-card" id="card-movers-table">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Biggest changes by road user</h2>
+            <p class="chart-subtitle">Change between 2011 and 2021 &bull; click a heading to sort</p>
+          </div>
+          <span class="chart-badge ">2011 vs 2021</span>
+        </div>
+        <div id="moversTable" class="table-container"></div>
+      </div>
+
+      <!-- States Cards -->
+      <div class="chart-card" id="card-state">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">State &amp; territory comparison</h2>
+            <p class="chart-subtitle">Click a bar to highlight a jurisdiction</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="stateChart" class="svg-container"></div>
+      </div>
+
       <div class="chart-card" id="card-state-table">
         <div class="chart-header">
           <div>
@@ -210,6 +178,29 @@
           <span class="chart-badge scope-badge">2011–2021</span>
         </div>
         <div id="stateTable" class="table-container"></div>
+      </div>
+
+      <!-- Road Users Cards -->
+      <div class="chart-card" id="card-roaduser">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Road user vulnerability</h2>
+            <p class="chart-subtitle">Top 7 road user categories</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="roadUserChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-counterparty">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Crash counterparty analysis</h2>
+            <p class="chart-subtitle">What the vehicle collided with</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="counterpartyChart" class="svg-container"></div>
       </div>
 
       <div class="chart-card" id="card-roaduser-table">
@@ -234,6 +225,19 @@
         <div id="counterpartyTable" class="table-container"></div>
       </div>
 
+      <!-- Regions Cards -->
+      <div class="chart-card" id="card-remoteness">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">ABS remoteness area trends</h2>
+            <p class="chart-subtitle">Missing-area records are excluded from the lines</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations | 2011–2021</span>
+        </div>
+        <div id="remotenessLegend" class="chart-legend"></div>
+        <div id="remotenessChart" class="svg-container"></div>
+      </div>
+
       <div class="chart-card" id="card-remoteness-table">
         <div class="chart-header">
           <div>
@@ -243,6 +247,19 @@
           <span class="chart-badge scope-badge">2011–2021</span>
         </div>
         <div id="remotenessTable" class="table-container"></div>
+      </div>
+
+      <!-- Demographics Cards -->
+      <div class="chart-card" id="card-demographics">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Age group &amp; biological sex profile</h2>
+            <p class="chart-subtitle">Missing and unclassified categories are retained</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="demographicsLegend" class="chart-legend"></div>
+        <div id="demographicsChart" class="svg-container"></div>
       </div>
 
       <div class="chart-card" id="card-age-table">
@@ -267,15 +284,49 @@
         <div id="sexTable" class="table-container"></div>
       </div>
 
-      <div class="chart-card" id="card-movers-table">
+      <!-- First Nations Cards -->
+      <div class="chart-card" id="card-fn-annual">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">Biggest changes by road user</h2>
-            <p class="chart-subtitle">Change between 2011 and 2021 &bull; click a heading to sort</p>
+            <h2 class="chart-title">First Nations vs. Non-Indigenous Hospitalisations</h2>
+            <p class="chart-subtitle">Annual injury trend comparison (2011–2021)</p>
           </div>
-          <span class="chart-badge ">2011 vs 2021</span>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
-        <div id="moversTable" class="table-container"></div>
+        <div id="fnAnnualChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-fn-remoteness">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">First Nations Hospitalisations by Remoteness</h2>
+            <p class="chart-subtitle">Major Cities, Regional, and Remote regions</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="fnRemotenessChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-fn-roaduser">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">First Nations Road User Vulnerability</h2>
+            <p class="chart-subtitle">Breakdown by transport category</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="fnRoadUserChart" class="svg-container"></div>
+      </div>
+
+      <div class="chart-card" id="card-fn-age">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">First Nations Age Profile</h2>
+            <p class="chart-subtitle">Injury counts across age demographics</p>
+          </div>
+          <span class="chart-badge metric-badge">Hospitalisations</span>
+        </div>
+        <div id="fnAgeChart" class="svg-container"></div>
       </div>
 
     </main>
@@ -298,6 +349,7 @@
   <script src="js/counterparty-chart.js"></script>
   <script src="js/overview-charts.js"></script>
   <script src="js/tables.js"></script>
+  <script src="js/first-nations-charts.js"></script>
   <script src="js/load-data.js"></script>
 </body>
 </html>
