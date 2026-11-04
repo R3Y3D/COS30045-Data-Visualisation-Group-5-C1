@@ -12,9 +12,9 @@ const appState = {
   // Datasets from Data/Cleaned_CSV_Files/
   nationalAnnual: [],     // national_annual.csv
   stateAnnual: [],        // Temporal Trends & State Comparisons.csv
-  roadUserAnnual: [],     // age_group_summary.csv (contains Calendar year, Road user, Sum(Hospitalisations), Sum(Bed days))
+  roadUserAnnual: [],     // road_user_summary.csv
   remotenessAnnual: [],   // remoteness_yearly_trends.csv
-  ageGroupAnnual: [],     // Age Group Demographics.csv
+  ageGroupAnnual: [],     // age_group_summary.csv
   genderAnnual: [],       // Gender_demographic_summary.csv
   counterpartyAnnual: []  // Counterparty Analysis.csv
 };

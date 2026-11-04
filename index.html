@@ -4,11 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Australian Road Crash Hospitalised Injuries Dashboard (2011–2021) | COS30045 Group 5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,500,0,0&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <div class="dashboard-shell">
+  <aside class="app-sidebar" aria-label="Dashboard navigation">
+    <a class="sidebar-brand" href="#dashboard" aria-label="Road Safety dashboard home">
+      <span class="brand-mark material-symbols-outlined" aria-hidden="true">insights</span>
+      <span class="sidebar-brand-text">Road<span>Safety</span></span>
+      <span class="sidebar-tag">C1</span>
+    </a>
+    <div class="sidebar-section-label">Dashboard</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link is-active" href="#dashboard"><span class="nav-icon material-symbols-outlined" aria-hidden="true">dashboard</span>Overview</a>
+      <a class="sidebar-link" href="#trendChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">show_chart</span>Annual trends</a>
+      <a class="sidebar-link" href="#stateChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">map</span>States &amp; territories</a>
+      <a class="sidebar-link" href="#roadUserChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">directions_bike</span>Road users</a>
+      <a class="sidebar-link" href="#remotenessChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">distance</span>Remoteness</a>
+      <a class="sidebar-link" href="#demographicsChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">groups</span>Demographics</a>
+      <a class="sidebar-link" href="#counterpartyChart"><span class="nav-icon material-symbols-outlined" aria-hidden="true">car_crash</span>Crash counterparties</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <span class="sidebar-bottom-mark">AU</span>
+      <span><strong>Australia</strong><small>2011–2021 dataset</small></span>
+    </div>
+  </aside>
+
+  <div class="dashboard-shell" id="dashboard">
 
     <!-- Compact Top Header & Interactive Filter Bar -->
     <header class="topbar">
@@ -123,9 +149,9 @@
         <div class="chart-header">
           <div>
             <h2 class="chart-title">4. ABS Remoteness Area Trends</h2>
-            <p class="chart-subtitle">Source: <code>remoteness_yearly_trends.csv</code> (Major Cities, Regional, Remote)</p>
+          <p class="chart-subtitle">Major Cities, Regional and Remote; missing-area records are excluded from these lines.</p>
           </div>
-          <span class="chart-badge">Cases by Region</span>
+          <span class="chart-badge metric-badge">Hospitalisations | 2011–2021</span>
         </div>
         <div id="remotenessChart" class="svg-container"></div>
         <div id="remotenessLegend" class="chart-legend"></div>
@@ -136,7 +162,7 @@
         <div class="chart-header">
           <div>
             <h2 class="chart-title">5. Age Group &amp; Biological Sex Profile</h2>
-            <p class="chart-subtitle">Source: <code>Age Group Demographics.csv</code> &amp; <code>Gender_demographic_summary.csv</code></p>
+          <p class="chart-subtitle">Age and sex totals; missing and unclassified categories are retained.</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
@@ -161,7 +187,7 @@
     <!-- Single-line Footer -->
     <footer class="footer-bar">
       <span><strong>COS30045 Group 5 (C1):</strong> Ibrahim Mahbub (105684360) &bull; Darrshan A/L Muraleesvaran (105965528) &bull; Nasrul Aman bin Abdul Rashid (105556595)</span>
-      <span>Note: Mid-2017 NSW administrative reporting break &amp; 2020 COVID-19 mobility dip affect longitudinal comparisons.</span>
+      <span>Counts show hospitalisation burden, not exposure-adjusted risk. NSW/Victoria reporting changes and 2020 mobility restrictions affect comparisons.</span>
     </footer>
 
   </div>

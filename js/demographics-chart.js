@@ -1,5 +1,5 @@
 // Chart 5: Age Group & Biological Sex Profile
-// Sources: Data/Cleaned_CSV_Files/Age Group Demographics.csv & Gender_demographic_summary.csv
+// Sources: Data/Cleaned_CSV_Files/age_group_summary.csv & Gender_demographic_summary.csv
 
 function drawDemographicsChart() {
   const container = d3.select("#demographicsChart");
@@ -7,7 +7,7 @@ function drawDemographicsChart() {
 
   const metric = appState.metric;
   const ageRows = filterByYear(appState.ageGroupAnnual);
-  const sexRows = filterByYear(appState.genderAnnual).filter(d => d.sex === "Male" || d.sex === "Female");
+  const sexRows = filterByYear(appState.genderAnnual);
 
   const ageGrouped = d3.rollup(
     ageRows,
@@ -20,7 +20,12 @@ function drawDemographicsChart() {
 
   const totalAgeMetric = d3.sum(Array.from(ageGrouped.values()), d => d[metric]) || 1;
 
-  const data = AGE_ORDER.map(age => {
+  const ageDomain = [
+    ...AGE_ORDER,
+    ...Array.from(ageGrouped.keys()).filter(age => !AGE_ORDER.includes(age)).sort()
+  ];
+
+  const data = ageDomain.map(age => {
     const counts = ageGrouped.get(age) || { hospitalisations: 0, bed_days: 0 };
     return {
       ageGroup: age,
@@ -46,7 +51,7 @@ function drawDemographicsChart() {
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleBand()
-    .domain(AGE_ORDER)
+    .domain(ageDomain)
     .range([0, innerWidth])
     .padding(0.28);
 
@@ -105,17 +110,20 @@ function drawDemographicsChart() {
 
   // Biological Sex Summary in Legend bar (from Gender_demographic_summary.csv)
   const sexTotals = d3.rollup(sexRows, v => d3.sum(v, d => d[metric]), d => d.sex);
-  const maleVal = sexTotals.get("Male") || 0;
-  const femaleVal = sexTotals.get("Female") || 0;
-  const totalSex = (maleVal + femaleVal) || 1;
+  const totalSex = d3.sum(Array.from(sexTotals.values())) || 1;
 
   const legend = d3.select("#demographicsLegend");
   legend.selectAll("*").remove();
 
-  [
-    { label: "Male", val: maleVal, color: COLORS.sex.Male },
-    { label: "Female", val: femaleVal, color: COLORS.sex.Female }
-  ].forEach(s => {
+  Array.from(sexTotals, ([label, val]) => ({
+    label,
+    val,
+    color: COLORS.sex[label] || "#94a3b8"
+  })).sort((a, b) => {
+    const order = ["Male", "Female"];
+    return (order.indexOf(a.label) < 0 ? 99 : order.indexOf(a.label)) -
+      (order.indexOf(b.label) < 0 ? 99 : order.indexOf(b.label)) || a.label.localeCompare(b.label);
+  }).forEach(s => {
     const pct = ((s.val / totalSex) * 100).toFixed(1);
     const item = legend.append("span").attr("class", "legend-item");
     item.append("span").attr("class", "legend-swatch").style("background-color", s.color);

@@ -12,7 +12,7 @@ function drawRemotenessChart() {
     appState.remotenessAnnual.filter(d => categories.includes(d.remoteness)),
     v => ({
       hospitalisations: d3.sum(v, d => d.hospitalisations),
-      died_bed_days: d3.sum(v, d => d.died_bed_days)
+      bed_days: d3.sum(v, d => d.bed_days)
     }),
     d => d.remoteness,
     d => d.year
@@ -21,13 +21,13 @@ function drawRemotenessChart() {
   const seriesList = categories.map(cat => {
     const yearMap = nested.get(cat) || new Map();
     const values = years.map(y => {
-      const rec = yearMap.get(y) || { hospitalisations: 0, died_bed_days: 0 };
+      const rec = yearMap.get(y) || { hospitalisations: 0, bed_days: 0 };
       return {
         year: y,
         remoteness: cat,
         hospitalisations: rec.hospitalisations,
-        died_bed_days: rec.died_bed_days,
-        value: rec.hospitalisations
+        bed_days: rec.bed_days,
+        value: rec[appState.metric]
       };
     });
     const scopedVals = appState.year === "All" ? values : values.filter(v => String(v.year) === String(appState.year));
@@ -116,7 +116,7 @@ function drawRemotenessChart() {
           event,
           `<strong>${d.remoteness} (${d.year})</strong>
            Hospitalisations: <b>${formatNumber(d.hospitalisations)}</b><br/>
-           Died Bed Days: <b>${formatNumber(d.died_bed_days)}</b>`
+           Bed days: <b>${formatNumber(d.bed_days)}</b>`
         );
       })
       .on("mousemove", moveTooltip)

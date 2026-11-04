@@ -1,5 +1,5 @@
 // Chart 3: Road User Vulnerability Horizontal Bar Chart
-// Source: Data/Cleaned_CSV_Files/age_group_summary.csv & road_user_annual.csv
+// Source: Data/Cleaned_CSV_Files/road_user_summary.csv
 
 function drawRoadUserChart() {
   const container = d3.select("#roadUserChart");
