@@ -32,16 +32,16 @@ function parseRemotenessRow(d) {
     year: +d["Calendar year"],
     remoteness: d["ABS remoteness area"],
     hospitalisations: +d["Sum(Hospitalisations)"],
-    died_bed_days: +d["Sum(Died_bed_days)"]
+    bed_days: +d["Sum(Bed days)"]
   };
 }
 
 function parseAgeGroupRow(d) {
   return {
-    year: +d["calendar year (#3)"],
-    age_group: d["age group"],
-    hospitalisations: +d["Sum(count of cases excluding died in hospitals within 30 days (#3))"],
-    bed_days: +d["Sum(bed days excluding died in hospitals within 30 days (#3))"]
+    year: +d["Calendar year"],
+    age_group: d["Age group"],
+    hospitalisations: +d["Sum(Hospitalisations)"],
+    bed_days: +d["Sum(Bed days)"]
   };
 }
 
@@ -164,9 +164,9 @@ const CSV_DIR = "Data/Cleaned_CSV_Files/";
 Promise.all([
   d3.csv(CSV_DIR + "national_annual.csv", parseNationalRow),
   d3.csv(CSV_DIR + "Temporal Trends & State Comparisons.csv", parseStateRow),
-  d3.csv(CSV_DIR + "age_group_summary.csv", parseRoadUserRow),
+  d3.csv(CSV_DIR + "road_user_summary.csv", parseRoadUserRow),
   d3.csv(CSV_DIR + "remoteness_yearly_trends.csv", parseRemotenessRow),
-  d3.csv(CSV_DIR + "Age Group Demographics.csv", parseAgeGroupRow),
+  d3.csv(CSV_DIR + "age_group_summary.csv", parseAgeGroupRow),
   d3.csv(CSV_DIR + "Gender_demographic_summary.csv", parseGenderRow),
   d3.csv(CSV_DIR + "Counterparty Analysis.csv", parseCounterpartyRow)
 ])
@@ -189,9 +189,9 @@ Promise.all([
       const fb = window.CLEANED_CSV_FALLBACK;
       appState.nationalAnnual = fb["national_annual.csv"].map(parseNationalRow);
       appState.stateAnnual = fb["Temporal Trends & State Comparisons.csv"].map(parseStateRow);
-      appState.roadUserAnnual = fb["age_group_summary.csv"].map(parseRoadUserRow);
+      appState.roadUserAnnual = fb["road_user_summary.csv"].map(parseRoadUserRow);
       appState.remotenessAnnual = fb["remoteness_yearly_trends.csv"].map(parseRemotenessRow);
-      appState.ageGroupAnnual = fb["Age Group Demographics.csv"].map(parseAgeGroupRow);
+      appState.ageGroupAnnual = fb["age_group_summary.csv"].map(parseAgeGroupRow);
       appState.genderAnnual = fb["Gender_demographic_summary.csv"].map(parseGenderRow);
       appState.counterpartyAnnual = fb["Counterparty Analysis.csv"].map(parseCounterpartyRow);
 

@@ -1,45 +1,45 @@
-"Calendar year","ABS remoteness area","Sum(Hospitalisations)","Sum(Died_bed_days)"
-2011,"Major Cities",21870,743
-2011,"Missing",546,58
-2011,"Regional",10461,462
-2011,"Remote",1156,23
-2012,"Major Cities",21812,490
-2012,"Missing",628,10
-2012,"Regional",10321,443
-2012,"Remote",1263,43
-2013,"Major Cities",23134,582
-2013,"Missing",663,11
-2013,"Regional",9984,282
-2013,"Remote",1220,22
-2014,"Major Cities",23481,705
-2014,"Missing",746,63
-2014,"Regional",10135,373
-2014,"Remote",1153,39
-2015,"Major Cities",24557,641
-2015,"Missing",845,48
-2015,"Regional",10502,532
-2015,"Remote",1178,38
-2016,"Major Cities",26344,924
-2016,"Missing",813,24
-2016,"Regional",10662,375
-2016,"Remote",1144,69
-2017,"Major Cities",26279,777
-2017,"Missing",968,56
-2017,"Regional",11038,423
-2017,"Remote",1054,75
-2018,"Major Cities",26168,812
-2018,"Missing",1013,46
-2018,"Regional",11209,477
-2018,"Remote",1200,37
-2019,"Major Cities",26555,841
-2019,"Missing",1167,51
-2019,"Regional",11045,270
-2019,"Remote",1099,12
-2020,"Major Cities",24925,358
-2020,"Missing",815,19
-2020,"Regional",11054,238
-2020,"Remote",1172,12
-2021,"Major Cities",26355,0
-2021,"Missing",629,0
-2021,"Regional",11407,0
-2021,"Remote",1114,0
+"Calendar year","ABS remoteness area","Sum(Hospitalisations)","Sum(Bed days)"
+2011,"Major Cities",21870,94666
+2011,"Missing",546,3138
+2011,"Regional",10461,52304
+2011,"Remote",1156,5851
+2012,"Major Cities",21812,92319
+2012,"Missing",628,3256
+2012,"Regional",10321,50756
+2012,"Remote",1263,6450
+2013,"Major Cities",23134,90735
+2013,"Missing",663,3342
+2013,"Regional",9984,46706
+2013,"Remote",1220,6012
+2014,"Major Cities",23481,87650
+2014,"Missing",746,3802
+2014,"Regional",10135,46508
+2014,"Remote",1153,6200
+2015,"Major Cities",24557,114760
+2015,"Missing",845,4329
+2015,"Regional",10502,57497
+2015,"Remote",1178,6503
+2016,"Major Cities",26344,140923
+2016,"Missing",813,5173
+2016,"Regional",10662,66591
+2016,"Remote",1144,6470
+2017,"Major Cities",26279,133526
+2017,"Missing",968,4996
+2017,"Regional",11038,67632
+2017,"Remote",1054,6466
+2018,"Major Cities",26168,127614
+2018,"Missing",1013,5400
+2018,"Regional",11209,69650
+2018,"Remote",1200,6050
+2019,"Major Cities",26555,133208
+2019,"Missing",1167,5463
+2019,"Regional",11045,64493
+2019,"Remote",1099,5725
+2020,"Major Cities",24925,116282
+2020,"Missing",815,3222
+2020,"Regional",11054,62695
+2020,"Remote",1172,5594
+2021,"Major Cities",26355,122260
+2021,"Missing",629,3516
+2021,"Regional",11407,66599
+2021,"Remote",1114,6559
