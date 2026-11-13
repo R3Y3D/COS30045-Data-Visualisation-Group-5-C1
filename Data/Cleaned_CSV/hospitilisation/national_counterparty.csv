@@ -1,0 +1,111 @@
+"year","counterparty","bed_days","cases","bed_days_per_case"
+2011,"2- or 3- wheeled motor vehicle",1379,246,5.605691056910569
+2011,"Car, pick-up truck or van",68553,14014,4.89175110603682
+2011,"Fixed or stationary object",28106,4933,5.697547131562944
+2011,"Heavy transport vehicle or bus",8259,1069,7.725912067352666
+2011,"Non-collision transport accident",31439,8643,3.637510123799607
+2011,"Other and unspecified transport accidents",14338,4416,3.2468297101449277
+2011,"Other non-motor vehicle",220,46,4.782608695652174
+2011,"Pedal cycle",876,280,3.1285714285714286
+2011,"Pedestrian or animal",2201,342,6.435672514619883
+2011,"Train",588,44,13.363636363636363
+2012,"2- or 3- wheeled motor vehicle",1263,217,5.820276497695852
+2012,"Car, pick-up truck or van",66151,13786,4.798418685623096
+2012,"Fixed or stationary object",26196,4899,5.347213717085119
+2012,"Heavy transport vehicle or bus",7889,1021,7.726738491674829
+2012,"Non-collision transport accident",33341,8815,3.7823028927963698
+2012,"Other and unspecified transport accidents",14550,4515,3.222591362126246
+2012,"Other non-motor vehicle",264,43,6.1395348837209305
+2012,"Pedal cycle",1035,321,3.2242990654205608
+2012,"Pedestrian or animal",1822,380,4.794736842105263
+2012,"Train",270,27,10
+2013,"2- or 3- wheeled motor vehicle",1238,233,5.313304721030043
+2013,"Car, pick-up truck or van",61418,13999,4.387313379527109
+2013,"Fixed or stationary object",25881,4978,5.199075934110084
+2013,"Heavy transport vehicle or bus",8010,1104,7.255434782608695
+2013,"Non-collision transport accident",33081,9417,3.5129021981522777
+2013,"Other and unspecified transport accidents",13845,4330,3.197459584295612
+2013,"Other non-motor vehicle",271,50,5.42
+2013,"Pedal cycle",1316,431,3.0533642691415315
+2013,"Pedestrian or animal",1476,434,3.4009216589861753
+2013,"Train",259,25,10.36
+2014,"2- or 3- wheeled motor vehicle",1493,244,6.118852459016393
+2014,"Car, pick-up truck or van",60093,14258,4.2146864917940805
+2014,"Fixed or stationary object",24791,5062,4.897471355195575
+2014,"Heavy transport vehicle or bus",6766,1077,6.282265552460538
+2014,"Non-collision transport accident",34902,9639,3.6209150326797386
+2014,"Other and unspecified transport accidents",12625,4361,2.8949782160055033
+2014,"Other non-motor vehicle",306,60,5.1
+2014,"Pedal cycle",1058,366,2.890710382513661
+2014,"Pedestrian or animal",1829,424,4.313679245283019
+2014,"Train",297,24,12.375
+2015,"2- or 3- wheeled motor vehicle",1587,267,5.943820224719101
+2015,"Car, pick-up truck or van",76892,15318,5.019715367541455
+2015,"Fixed or stationary object",35679,5304,6.726809954751131
+2015,"Heavy transport vehicle or bus",9991,1074,9.302607076350093
+2015,"Non-collision transport accident",37598,9870,3.809321175278622
+2015,"Other and unspecified transport accidents",16604,4347,3.819645732689211
+2015,"Other non-motor vehicle",522,46,11.347826086956522
+2015,"Pedal cycle",1313,418,3.1411483253588517
+2015,"Pedestrian or animal",2595,406,6.391625615763547
+2015,"Train",308,32,9.625
+2016,"2- or 3- wheeled motor vehicle",2029,288,7.045138888888889
+2016,"Car, pick-up truck or van",97871,16551,5.913298290133526
+2016,"Fixed or stationary object",41148,5607,7.33868378812199
+2016,"Heavy transport vehicle or bus",11873,1138,10.433216168717047
+2016,"Non-collision transport accident",41267,9911,4.163757441226919
+2016,"Other and unspecified transport accidents",19518,4553,4.286843839226884
+2016,"Other non-motor vehicle",763,56,13.625
+2016,"Pedal cycle",1617,401,4.032418952618454
+2016,"Pedestrian or animal",2430,420,5.785714285714286
+2016,"Train",641,38,16.86842105263158
+2017,"2- or 3- wheeled motor vehicle",1166,255,4.572549019607843
+2017,"Car, pick-up truck or van",97494,16966,5.746434044559708
+2017,"Fixed or stationary object",38553,5451,7.072647220693451
+2017,"Heavy transport vehicle or bus",10287,1183,8.695688926458157
+2017,"Non-collision transport accident",40759,10089,4.03994449400337
+2017,"Other and unspecified transport accidents",20127,4395,4.579522184300341
+2017,"Other non-motor vehicle",316,75,4.213333333333333
+2017,"Pedal cycle",1568,432,3.6296296296296298
+2017,"Pedestrian or animal",2027,469,4.321961620469083
+2017,"Train",323,24,13.458333333333334
+2018,"2- or 3- wheeled motor vehicle",1381,236,5.851694915254237
+2018,"Car, pick-up truck or van",88113,16805,5.24326093424576
+2018,"Fixed or stationary object",38841,5558,6.988305145735876
+2018,"Heavy transport vehicle or bus",10075,1112,9.06025179856115
+2018,"Non-collision transport accident",43282,10368,4.174575617283951
+2018,"Other and unspecified transport accidents",21904,4452,4.9200359389038635
+2018,"Other non-motor vehicle",489,102,4.794117647058823
+2018,"Pedal cycle",1857,416,4.4639423076923075
+2018,"Pedestrian or animal",2261,501,4.512974051896207
+2018,"Train",511,40,12.775
+2019,"2- or 3- wheeled motor vehicle",2092,299,6.996655518394649
+2019,"Car, pick-up truck or van",91683,17109,5.3587585481325615
+2019,"Fixed or stationary object",39382,5539,7.109947643979058
+2019,"Heavy transport vehicle or bus",9316,1072,8.690298507462687
+2019,"Non-collision transport accident",37775,10040,3.762450199203187
+2019,"Other and unspecified transport accidents",23378,4750,4.921684210526315
+2019,"Other non-motor vehicle",339,79,4.291139240506329
+2019,"Pedal cycle",1481,464,3.1918103448275863
+2019,"Pedestrian or animal",2544,488,5.213114754098361
+2019,"Train",899,26,34.57692307692308
+2020,"2- or 3- wheeled motor vehicle",1717,298,5.761744966442953
+2020,"Car, pick-up truck or van",77064,14668,5.253886010362694
+2020,"Fixed or stationary object",37365,5656,6.6062588401697315
+2020,"Heavy transport vehicle or bus",7797,893,8.731243001119822
+2020,"Non-collision transport accident",39704,10905,3.640898670334709
+2020,"Other and unspecified transport accidents",19915,4682,4.253524134985049
+2020,"Other non-motor vehicle",275,55,5
+2020,"Pedal cycle",1516,391,3.877237851662404
+2020,"Pedestrian or animal",1783,395,4.5139240506329115
+2020,"Train",657,23,28.565217391304348
+2021,"2- or 3- wheeled motor vehicle",1728,300,5.76
+2021,"Car, pick-up truck or van",84260,16192,5.203804347826087
+2021,"Fixed or stationary object",36041,5596,6.440493209435311
+2021,"Heavy transport vehicle or bus",10135,1020,9.936274509803921
+2021,"Non-collision transport accident",41809,10728,3.8971849366144666
+2021,"Other and unspecified transport accidents",21005,4644,4.523040482342808
+2021,"Other non-motor vehicle",291,64,4.546875
+2021,"Pedal cycle",1520,451,3.3702882483370287
+2021,"Pedestrian or animal",1822,481,3.787941787941788
+2021,"Train",323,29,11.137931034482758
