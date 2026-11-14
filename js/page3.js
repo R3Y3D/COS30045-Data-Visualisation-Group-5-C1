@@ -47,6 +47,8 @@
     years: [],
     year: null // null = all years (category charts); trend always shows full series
   };
+  const entrance = createEntranceController(1400);
+  let animateNow = false;
 
   Promise.all([
     d3.csv(URLS.year, d3.autoType),
@@ -75,7 +77,10 @@
       initThemeToggle();
       initChartExpand();
       renderAll();
-      const ro = new ResizeObserver(drawCharts);
+      const ro = new ResizeObserver(() => {
+        if (entrance.shouldSkipResize()) return;
+        drawCharts();
+      });
       ["#trendChart", "#remotenessChart", "#roadUserChart", "#streamChart"]
         .forEach(sel => ro.observe(document.querySelector(sel)));
       window.addEventListener("themechange", drawCharts);
@@ -126,10 +131,14 @@
   }
 
   function drawCharts() {
+    animateNow = entrance.beginDraw([
+      "#trendChart", "#remotenessChart", "#roadUserChart", "#streamChart"
+    ]);
     drawTrend();
     drawRemoteness();
     drawRoadUser();
     drawStream();
+    animateNow = false;
   }
 
   // ---------- Helpers ----------
@@ -282,18 +291,18 @@
         .attr("stroke", STATUS_COLOR[s.status])
         .attr("stroke-width", 2.4)
         .attr("d", line);
-      const len = path.node().getTotalLength();
-      if (chartDuration() > 0) {
+      if (animateNow) {
+        const len = path.node().getTotalLength();
         path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
-          .transition().duration(chartDuration(700)).ease(d3.easeCubicOut)
+          .transition().duration(animDuration(true, 800)).delay(100).ease(d3.easeCubicOut)
           .attr("stroke-dashoffset", 0);
       }
 
-      g.selectAll(null).data(s.values).join("circle")
+      const dots = g.selectAll(null).data(s.values).join("circle")
         .attr("class", "bar-interactive")
         .attr("cx", d => x(d.year))
         .attr("cy", d => y(d.index))
-        .attr("r", 0)
+        .attr("r", animateNow ? 0 : d => (state.year === d.year ? 6 : 4))
         .attr("fill", STATUS_COLOR[s.status])
         .attr("tabindex", 0)
         .attr("role", "button")
@@ -310,9 +319,11 @@
             event.preventDefault();
             setYear(state.year === d.year ? null : d.year);
           }
-        })
-        .transition().duration(chartDuration(400)).delay((_, i) => chartDuration(260) + chartDelay() * i)
-        .attr("r", d => (state.year === d.year ? 6 : 4));
+        });
+      if (animateNow) {
+        dots.transition().duration(animDuration(true, 400)).delay((_, i) => 280 + animDelay(true, 40) * i)
+          .attr("r", d => (state.year === d.year ? 6 : 4));
+      }
     }
   }
 
@@ -362,12 +373,12 @@
     g.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`));
 
     for (const group of stacked) {
-      g.selectAll(null).data(group).join("rect")
+      const rects = g.selectAll(null).data(group).join("rect")
         .attr("class", "bar-interactive")
         .attr("x", d => x(d.status))
         .attr("width", x.bandwidth())
-        .attr("y", ih)
-        .attr("height", 0)
+        .attr("y", animateNow ? ih : d => y(d.y1))
+        .attr("height", animateNow ? 0 : d => Math.max(0, y(d.y0) - y(d.y1)))
         .attr("fill", d => REMOTE_COLORS[d.remoteness])
         .attr("tabindex", 0)
         .attr("role", "img")
@@ -379,15 +390,18 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip)
-        .transition().duration(chartDuration()).delay((_, i) => chartDelay(50) * i).ease(d3.easeCubicOut)
-        .attr("y", d => y(d.y1))
-        .attr("height", d => Math.max(0, y(d.y0) - y(d.y1)));
+        .on("mouseleave blur", hideTooltip);
+
+      if (animateNow) {
+        rects.transition().duration(animDuration(true, 650)).delay((_, i) => 80 + animDelay(true, 55) * i).ease(d3.easeCubicOut)
+          .attr("y", d => y(d.y1))
+          .attr("height", d => Math.max(0, y(d.y0) - y(d.y1)));
+      }
 
       // Label Remote share (story focus) when tall enough
       const remote = group.find(d => d.remoteness === "Remote");
       if (remote && remote.share >= 4) {
-        g.append("text")
+        const label = g.append("text")
           .attr("x", x(remote.status) + x.bandwidth() / 2)
           .attr("y", y(remote.y0 + remote.share / 2))
           .attr("dy", "0.35em")
@@ -395,7 +409,11 @@
           .attr("fill", "#fff")
           .attr("font-size", "11px")
           .attr("font-weight", "700")
+          .attr("opacity", animateNow ? 0 : 1)
           .text(`${formatDecimal(remote.share)}%`);
+        if (animateNow) {
+          label.transition().duration(animDuration(true, 400)).delay(420).attr("opacity", 1);
+        }
       }
     }
 
@@ -460,25 +478,27 @@
       .call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}%`));
 
     // Connector
-    g.selectAll("line.conn").data(data.filter(d => Number.isFinite(d.fnShare) && Number.isFinite(d.niShare))).join("line")
+    const conns = g.selectAll("line.conn").data(data.filter(d => Number.isFinite(d.fnShare) && Number.isFinite(d.niShare))).join("line")
       .attr("class", "conn")
       .attr("x1", d => x(d.fnShare))
-      .attr("x2", d => x(d.fnShare))
+      .attr("x2", d => animateNow ? x(d.fnShare) : x(d.niShare))
       .attr("y1", d => y(d.label) + y.bandwidth() / 2)
       .attr("y2", d => y(d.label) + y.bandwidth() / 2)
       .attr("stroke", isDarkTheme() ? "#3d4f6a" : "#cbd5e1")
       .attr("stroke-width", 2)
-      .attr("opacity", 0)
-      .transition().duration(chartDuration(450)).delay((_, i) => chartDelay(30) * i)
-      .attr("x2", d => x(d.niShare))
-      .attr("opacity", 1);
+      .attr("opacity", animateNow ? 0 : 1);
+    if (animateNow) {
+      conns.transition().duration(animDuration(true, 450)).delay((_, i) => 40 + animDelay(true, 35) * i)
+        .attr("x2", d => x(d.niShare))
+        .attr("opacity", 1);
+    }
 
     function drawDots(key, shareKey, color) {
-      g.selectAll(`circle.${key}`).data(data).join("circle")
+      const dots = g.selectAll(`circle.${key}`).data(data).join("circle")
         .attr("class", `bar-interactive ${key}`)
         .attr("cx", d => Number.isFinite(d[shareKey]) ? x(d[shareKey]) : -999)
         .attr("cy", d => y(d.label) + y.bandwidth() / 2)
-        .attr("r", 0)
+        .attr("r", animateNow ? 0 : d => Number.isFinite(d[shareKey]) ? 5.5 : 0)
         .attr("fill", color)
         .attr("opacity", d => (d[key].suppressed ? 0.75 : 1))
         .attr("stroke", d => (d[key].suppressed ? "#fff" : "none"))
@@ -503,19 +523,23 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip)
-        .transition().duration(chartDuration(420)).delay((_, i) => chartDuration(120) + chartDelay(30) * i)
-        .attr("r", d => Number.isFinite(d[shareKey]) ? 5.5 : 0);
+        .on("mouseleave blur", hideTooltip);
+      if (animateNow) {
+        dots.transition().duration(animDuration(true, 420)).delay((_, i) => 140 + animDelay(true, 35) * i)
+          .attr("r", d => Number.isFinite(d[shareKey]) ? 5.5 : 0);
+      }
 
       // Hatch overlay for suppressed published values
-      g.selectAll(`circle.hatch-${key}`).data(data.filter(d => d[key].suppressed && Number.isFinite(d[shareKey]))).join("circle")
+      const hatch = g.selectAll(`circle.hatch-${key}`).data(data.filter(d => d[key].suppressed && Number.isFinite(d[shareKey]))).join("circle")
         .attr("cx", d => x(d[shareKey]))
         .attr("cy", d => y(d.label) + y.bandwidth() / 2)
-        .attr("r", 0)
+        .attr("r", animateNow ? 0 : 5.5)
         .attr("fill", "url(#hatch-fn)")
-        .attr("pointer-events", "none")
-        .transition().duration(chartDuration(420)).delay(chartDuration(160))
-        .attr("r", 5.5);
+        .attr("pointer-events", "none");
+      if (animateNow) {
+        hatch.transition().duration(animDuration(true, 420)).delay(180)
+          .attr("r", 5.5);
+      }
     }
 
     drawDots("fn", "fnShare", STATUS_COLOR[FN]);
@@ -585,10 +609,10 @@
       .y1(d => y(d[1]))
       .curve(d3.curveBasis);
 
-    g.selectAll("path.layer").data(stacked).join("path")
+    const layers = g.selectAll("path.layer").data(stacked).join("path")
       .attr("class", "layer bar-interactive")
       .attr("fill", (d, i) => REMOTE_COLORS[REMOTE_ORDER[i]])
-      .attr("opacity", 0)
+      .attr("opacity", animateNow ? 0 : 0.92)
       .attr("d", area)
       .attr("tabindex", 0)
       .attr("role", "img")
@@ -604,9 +628,11 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip)
-      .transition().duration(chartDuration(650)).delay((_, i) => chartDelay(80) * i).ease(d3.easeCubicOut)
-      .attr("opacity", 0.92);
+      .on("mouseleave blur", hideTooltip);
+    if (animateNow) {
+      layers.transition().duration(animDuration(true, 700)).delay((_, i) => 80 + animDelay(true, 90) * i).ease(d3.easeCubicOut)
+        .attr("opacity", 0.92);
+    }
 
     // Hover bands by year for precise tooltips
     g.selectAll("rect.year-hit").data(years).join("rect")

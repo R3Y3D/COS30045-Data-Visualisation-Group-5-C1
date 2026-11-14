@@ -161,6 +161,52 @@ function chartDelay(ms = 18) {
   return prefersReducedMotion() ? 0 : ms;
 }
 
+/**
+ * One-shot page-load entrance controller.
+ * First draw returns animate=true; ResizeObserver is ignored briefly so it
+ * does not wipe the entrance mid-transition.
+ * Pass chart host selectors (or elements) so a too-small first layout does
+ * not consume the entrance before charts can actually draw.
+ */
+function createEntranceController(holdMs = 1100) {
+  let pending = true;
+  let ignoreResizeUntil = 0;
+  const MIN = 80;
+
+  function hostsReady(hosts) {
+    if (!hosts || !hosts.length) return true;
+    return hosts.every(sel => {
+      const el = typeof sel === "string" ? document.querySelector(sel) : sel;
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.width >= MIN && r.height >= MIN;
+    });
+  }
+
+  return {
+    beginDraw(hosts) {
+      if (!hostsReady(hosts)) return false;
+      const animate = pending && !prefersReducedMotion();
+      if (animate) {
+        pending = false;
+        ignoreResizeUntil = performance.now() + holdMs;
+      }
+      return animate;
+    },
+    shouldSkipResize() {
+      return performance.now() < ignoreResizeUntil;
+    }
+  };
+}
+
+/** Duration/delay helpers that honour an explicit animate flag. */
+function animDuration(animate, ms = 520) {
+  return animate ? chartDuration(ms) : 0;
+}
+function animDelay(animate, ms = 18) {
+  return animate ? chartDelay(ms) : 0;
+}
+
 // ---------- Light / dark theme ----------
 const THEME_KEY = "cos30045-theme";
 

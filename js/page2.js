@@ -29,6 +29,7 @@
     metric: "cases",     // "cases" | "stay"
     selectedState: null
   };
+  const entrance = createEntranceController(1400);
 
   const REMOTE_ORDER = ["Major Cities", "Regional", "Remote", "Missing"];
   const SHORT_ROAD = {
@@ -66,7 +67,10 @@
       initThemeToggle();
       initChartExpand();
       renderAll();
-      const ro = new ResizeObserver(drawCharts);
+      const ro = new ResizeObserver(() => {
+        if (entrance.shouldSkipResize()) return;
+        drawCharts();
+      });
       ["#roadUserChart", "#ageSexChart", "#stateChart", "#remotenessChart"]
         .forEach(sel => ro.observe(document.querySelector(sel)));
       window.addEventListener("themechange", drawCharts);
@@ -144,16 +148,22 @@
     return { clientX: r.right, clientY: r.top };
   }
 
+  let animateNow = false;
+
   function renderAll() {
     updateHeadline();
     drawCharts();
   }
 
   function drawCharts() {
+    animateNow = entrance.beginDraw([
+      "#roadUserChart", "#ageSexChart", "#stateChart", "#remotenessChart"
+    ]);
     drawRoadUser();
     drawAgeSex();
     drawStates();
     drawRemoteness();
+    animateNow = false;
   }
 
   // ---------- Helpers ----------
@@ -285,30 +295,39 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip)
-      .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
-      .attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0);
+      .on("mouseleave blur", hideTooltip);
+
+    const bars = g.selectAll("rect.bar");
+    if (animateNow) {
+      bars.transition().duration(animDuration(true, 650)).delay((_, i) => 60 + animDelay(true, 40) * i).ease(d3.easeCubicOut)
+        .attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0);
+    } else {
+      bars.attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0);
+    }
 
     // Stay labels when showing cases; n.p. markers when missing
-    g.selectAll("text.side").data(rows).join("text")
+    const labels = g.selectAll("text.side").data(rows).join("text")
       .attr("class", "side")
-      .attr("x", 6)
+      .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("fill", themeMuted())
       .attr("font-size", "11px")
       .attr("font-weight", "600")
-      .attr("opacity", 0)
+      .attr("opacity", animateNow ? 0 : 1)
       .text(d => {
         if (!Number.isFinite(d.value)) return "n.p.";
         if (state.metric === "cases" && Number.isFinite(d.bed_days_per_case)) {
           return `${formatDecimal(d.bed_days_per_case)} d`;
         }
         return formatMetric(d.value);
-      })
-      .transition().duration(chartDuration(400)).delay((_, i) => chartDuration(180) + chartDelay() * i)
-      .attr("opacity", 1)
-      .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6);
+      });
+    if (animateNow) {
+      labels.attr("x", 6)
+        .transition().duration(animDuration(true, 400)).delay((_, i) => 220 + animDelay(true, 35) * i)
+        .attr("opacity", 1)
+        .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6);
+    }
   }
 
   // ---------- Chart 2: age × sex population pyramid ----------
@@ -385,17 +404,24 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip)
-        .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
-        .attr("x", d => {
-          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
-          if (!Number.isFinite(v)) return side === "male" ? half : 0;
-          return side === "male" ? xScale(v) : 0;
-        })
-        .attr("width", d => {
-          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
-          return Number.isFinite(v) ? Math.abs(xScale(v) - xScale(0)) : 0;
-        });
+        .on("mouseleave blur", hideTooltip);
+
+      const endX = d => {
+        const v = useStay ? d[side].bed_days_per_case : d[side].cases;
+        if (!Number.isFinite(v)) return side === "male" ? half : 0;
+        return side === "male" ? xScale(v) : 0;
+      };
+      const endW = d => {
+        const v = useStay ? d[side].bed_days_per_case : d[side].cases;
+        return Number.isFinite(v) ? Math.abs(xScale(v) - xScale(0)) : 0;
+      };
+      const rects = sel.selectAll("rect");
+      if (animateNow) {
+        rects.transition().duration(animDuration(true, 600)).delay((_, i) => 100 + animDelay(true, 45) * i).ease(d3.easeCubicOut)
+          .attr("x", endX).attr("width", endW);
+      } else {
+        rects.attr("x", endX).attr("width", endW);
+      }
     }
 
     bindSide(left, "male", xMale, COLORS.sex.Male);
@@ -488,17 +514,23 @@
       .on("mousemove", moveTooltip)
       .on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectState(d.state))
-      .on("keydown", onKeyState)
-      .transition().duration(chartDuration(380)).delay(d => {
+      .on("keydown", onKeyState);
+
+    const cellOpacity = d => {
+      if (state.selectedState && state.selectedState !== d.state) return 0.25;
+      if (state.year !== null && state.year !== d.year) return 0.35;
+      return 1;
+    };
+    const cellsSel = g.selectAll("rect.cell");
+    if (animateNow) {
+      cellsSel.transition().duration(animDuration(true, 420)).delay(d => {
         const yi = years.indexOf(d.year);
         const si = stateOrder.indexOf(d.state);
-        return chartDelay(8) * (yi + si);
-      })
-      .attr("opacity", d => {
-        if (state.selectedState && state.selectedState !== d.state) return 0.25;
-        if (state.year !== null && state.year !== d.year) return 0.35;
-        return 1;
-      });
+        return 80 + animDelay(true, 12) * (yi + si);
+      }).attr("opacity", cellOpacity);
+    } else {
+      cellsSel.attr("opacity", cellOpacity);
+    }
 
     // Colour legend
     const legendH = Math.max(40, ih * 0.55);
@@ -567,21 +599,31 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip)
-      .transition().duration(chartDuration()).delay((_, i) => chartDelay(40) * i).ease(d3.easeCubicOut)
-      .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
-      .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0);
+      .on("mouseleave blur", hideTooltip);
 
-    g.selectAll("text.val").data(rows.filter(d => Number.isFinite(d.value))).join("text")
+    const remoteBars = g.selectAll("rect.bar");
+    if (animateNow) {
+      remoteBars.transition().duration(animDuration(true, 650)).delay((_, i) => 120 + animDelay(true, 70) * i).ease(d3.easeCubicOut)
+        .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
+        .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0);
+    } else {
+      remoteBars
+        .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
+        .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0);
+    }
+
+    const remoteVals = g.selectAll("text.val").data(rows.filter(d => Number.isFinite(d.value))).join("text")
       .attr("x", d => x(d.remoteness) + x.bandwidth() / 2)
       .attr("y", d => y(d.value) - 5)
       .attr("text-anchor", "middle")
       .attr("fill", themeInk())
       .attr("font-size", "11px")
       .attr("font-weight", "700")
-      .attr("opacity", 0)
-      .text(d => formatDecimal(d.value))
-      .transition().duration(chartDuration(360)).delay(chartDuration(220))
-      .attr("opacity", 1);
+      .attr("opacity", animateNow ? 0 : 1)
+      .text(d => formatDecimal(d.value));
+    if (animateNow) {
+      remoteVals.transition().duration(animDuration(true, 360)).delay(animDuration(true, 380))
+        .attr("opacity", 1);
+    }
   }
 })();

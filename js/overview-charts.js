@@ -3,6 +3,7 @@
 
   const DATA_URL = "Data\\Cleaned_CSV\\hospitilisation\\national_annual.csv";
   const state = { rows: [], metric: "cases", year: null }; // year === null means "all years"
+  const entrance = createEntranceController(1200);
   const pct = d3.format("+.1f");
   const metricName = m => (m === "bed_days" ? "Bed days" : "Hospitalisations");
   const set = (sel, text) => d3.select(sel).text(text);
@@ -17,7 +18,10 @@
       initChartExpand();
       renderAll();
       // Redraw the charts when their boxes change size (window resize / expand)
-      const ro = new ResizeObserver(drawCharts);
+      const ro = new ResizeObserver(() => {
+        if (entrance.shouldSkipResize()) return;
+        drawCharts();
+      });
       ["#trendChart", "#stayChart"].forEach(s => ro.observe(document.querySelector(s)));
       window.addEventListener("themechange", drawCharts);
     })
@@ -81,7 +85,11 @@
   }
 
   const renderAll = () => { renderText(); drawCharts(); };
-  function drawCharts() { drawTrend(); drawStay(); }
+  function drawCharts() {
+    const animate = entrance.beginDraw(["#trendChart", "#stayChart"]);
+    drawTrend(animate);
+    drawStay(animate);
+  }
 
   const boxSize = host => {
     const r = host.node().getBoundingClientRect();
@@ -89,7 +97,7 @@
   };
 
   // ---------- Chart 1: bars per year, with the 2020 dip annotated ----------
-  function drawTrend() {
+  function drawTrend(animate = false) {
     const host = d3.select("#trendChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
@@ -133,17 +141,26 @@
         `Stay per admission: <b>${formatDecimal(d.bed_days_per_case)} days</b>`))
       .on("mousemove", moveTooltip).on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectYear(d.year))
-      .on("keydown", onKey)
-      .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
-      .attr("y", d => y(d[key])).attr("height", d => ih - y(d[key]));
+      .on("keydown", onKey);
+
+    if (animate) {
+      g.selectAll("rect.bar")
+        .transition().duration(animDuration(true, 650)).delay((_, i) => 80 + animDelay(true, 45) * i).ease(d3.easeCubicOut)
+        .attr("y", d => y(d[key])).attr("height", d => ih - y(d[key]));
+    } else {
+      g.selectAll("rect.bar")
+        .attr("y", d => y(d[key])).attr("height", d => ih - y(d[key]));
+    }
 
     if (iw > 520) {
-      g.selectAll("text.val").data(rows).join("text").attr("class", "val")
+      const vals = g.selectAll("text.val").data(rows).join("text").attr("class", "val")
         .attr("x", d => x(d.year) + x.bandwidth() / 2).attr("y", d => y(d[key]) - 4)
         .attr("text-anchor", "middle").attr("fill", themeInk()).attr("font-size", "11px").attr("font-weight", "600")
-        .attr("opacity", 0).text(d => formatNumber(d[key]))
-        .transition().duration(chartDuration(400)).delay(chartDuration(200))
-        .attr("opacity", 1);
+        .attr("opacity", animate ? 0 : 1).text(d => formatNumber(d[key]));
+      if (animate) {
+        vals.transition().duration(animDuration(true, 400)).delay(animDuration(true, 320))
+          .attr("opacity", 1);
+      }
     }
   }
 
@@ -154,7 +171,7 @@
   }
 
   // ---------- Chart 2: bed days per admission, with the 2014-2016 jump marked ----------
-  function drawStay() {
+  function drawStay(animate = false) {
     const host = d3.select("#stayChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
@@ -189,17 +206,17 @@
     const linePath = g.append("path").datum(rows)
       .attr("fill", "none").attr("stroke", COLORS.bedDays).attr("stroke-width", 2.4)
       .attr("d", d3.line().x(d => x(d.year)).y(d => y(d.bed_days_per_case)).curve(d3.curveMonotoneX));
-    const totalLen = linePath.node().getTotalLength();
-    if (chartDuration() > 0) {
+    if (animate) {
+      const totalLen = linePath.node().getTotalLength();
       linePath.attr("stroke-dasharray", `${totalLen} ${totalLen}`).attr("stroke-dashoffset", totalLen)
-        .transition().duration(chartDuration(700)).ease(d3.easeCubicOut)
+        .transition().duration(animDuration(true, 800)).delay(120).ease(d3.easeCubicOut)
         .attr("stroke-dashoffset", 0);
     }
 
-    g.selectAll("circle").data(rows).join("circle")
+    const dots = g.selectAll("circle").data(rows).join("circle")
       .attr("class", "bar-interactive")
       .attr("cx", d => x(d.year)).attr("cy", d => y(d.bed_days_per_case))
-      .attr("r", 0)
+      .attr("r", animate ? 0 : d => (state.year === d.year ? 6 : 4))
       .attr("fill", d => (state.year === d.year ? COLORS.highlight : "#fff"))
       .attr("stroke", d => (state.year === d.year ? COLORS.highlight : COLORS.bedDays)).attr("stroke-width", 2.2)
       .attr("tabindex", 0).attr("role", "button")
@@ -208,8 +225,10 @@
         `<strong>${d.year}</strong>Stay per admission: <b>${formatDecimal(d.bed_days_per_case)} days</b><br/>Bed days: <b>${formatNumber(d.bed_days)}</b>`))
       .on("mousemove", moveTooltip).on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectYear(d.year))
-      .on("keydown", onKey)
-      .transition().duration(chartDuration(420)).delay((_, i) => chartDuration(280) + chartDelay() * i)
-      .attr("r", d => (state.year === d.year ? 6 : 4));
+      .on("keydown", onKey);
+    if (animate) {
+      dots.transition().duration(animDuration(true, 420)).delay((_, i) => 280 + animDelay(true, 40) * i)
+        .attr("r", d => (state.year === d.year ? 6 : 4));
+    }
   }
 })();
