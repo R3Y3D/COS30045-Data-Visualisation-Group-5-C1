@@ -63,11 +63,13 @@
       state.remoteness = remoteness;
       state.years = [...new Set(state.roadUser.map(d => d.year).filter(Number.isFinite))].sort(d3.ascending);
       bindControls();
+      initThemeToggle();
       initChartExpand();
       renderAll();
       const ro = new ResizeObserver(drawCharts);
       ["#roadUserChart", "#ageSexChart", "#stateChart", "#remotenessChart"]
         .forEach(sel => ro.observe(document.querySelector(sel)));
+      window.addEventListener("themechange", drawCharts);
     })
     .catch(err => {
       console.error(err);
@@ -293,7 +295,7 @@
       .attr("x", 6)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
       .attr("dy", "0.35em")
-      .attr("fill", "#475569")
+      .attr("fill", themeMuted())
       .attr("font-size", "11px")
       .attr("font-weight", "600")
       .attr("opacity", 0)
@@ -356,7 +358,7 @@
     mid.selectAll("text").data(ages).join("text")
       .attr("x", labelW / 2).attr("y", d => y(d) + y.bandwidth() / 2)
       .attr("dy", "0.35em").attr("text-anchor", "middle")
-      .attr("fill", "#334155").attr("font-size", "11px").attr("font-weight", "650")
+      .attr("fill", themeInk()).attr("font-size", "11px").attr("font-weight", "650")
       .text(d => d);
 
     function bindSide(sel, side, xScale, color) {
@@ -447,7 +449,7 @@
 
     g.append("text")
       .attr("x", iw).attr("y", -6).attr("text-anchor", "end")
-      .attr("fill", "#b45309").attr("font-size", "10px").attr("font-weight", "600")
+      .attr("fill", themeWarn()).attr("font-size", "10px").attr("font-weight", "600")
       .text("Breaks: Vic from 2012 · NSW from Jun 2017");
 
     const x = d3.scaleBand(years, [0, iw]).paddingInner(0.06).paddingOuter(0.02);
@@ -574,7 +576,7 @@
       .attr("x", d => x(d.remoteness) + x.bandwidth() / 2)
       .attr("y", d => y(d.value) - 5)
       .attr("text-anchor", "middle")
-      .attr("fill", "#1e293b")
+      .attr("fill", themeInk())
       .attr("font-size", "11px")
       .attr("font-weight", "700")
       .attr("opacity", 0)

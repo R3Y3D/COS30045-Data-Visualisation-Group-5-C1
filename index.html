@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The national picture | Road crash hospitalised injuries 2011–2021</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("cos30045-theme");
+        if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,6 +36,9 @@
         <a class="tab is-active" href="index.html" aria-current="page">1 The national picture</a>
         <a class="tab" href="page2.html">2 Who is hurt, and where</a>
         <a class="tab" href="page3.html">3 First Nations</a>
+        <button type="button" class="btn-theme" id="themeToggle" aria-label="Switch to dark mode" title="Dark mode">
+          <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
+        </button>
       </nav>
     </header>
 

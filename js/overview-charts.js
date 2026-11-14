@@ -13,11 +13,13 @@
       state.rows = rows.filter(d => Number.isFinite(d.year)).sort((a, b) => a.year - b.year);
       if (!state.rows.length) throw new Error("no rows in file");
       bindControls();
+      initThemeToggle();
       initChartExpand();
       renderAll();
       // Redraw the charts when their boxes change size (window resize / expand)
       const ro = new ResizeObserver(drawCharts);
       ["#trendChart", "#stayChart"].forEach(s => ro.observe(document.querySelector(s)));
+      window.addEventListener("themechange", drawCharts);
     })
     .catch(err => {
       console.error(err);
@@ -115,7 +117,7 @@
       g.append("line").attr("x1", cx).attr("x2", cx).attr("y1", -4).attr("y2", ih)
         .attr("stroke", COLORS.amber).attr("stroke-dasharray", "3,3");
       g.append("text").attr("x", cx - 5).attr("y", -9).attr("text-anchor", "end")
-        .attr("fill", "#b45309").attr("font-size", "10px").attr("font-weight", "600")
+        .attr("fill", themeWarn()).attr("font-size", "10px").attr("font-weight", "600")
         .text(`2020: ${pct((b[key] / a[key] - 1) * 100)}% vs 2019 (COVID-19 period)`);
     }
 
@@ -138,7 +140,7 @@
     if (iw > 520) {
       g.selectAll("text.val").data(rows).join("text").attr("class", "val")
         .attr("x", d => x(d.year) + x.bandwidth() / 2).attr("y", d => y(d[key]) - 4)
-        .attr("text-anchor", "middle").attr("fill", "#1e293b").attr("font-size", "11px").attr("font-weight", "600")
+        .attr("text-anchor", "middle").attr("fill", themeInk()).attr("font-size", "11px").attr("font-weight", "600")
         .attr("opacity", 0).text(d => formatNumber(d[key]))
         .transition().duration(chartDuration(400)).delay(chartDuration(200))
         .attr("opacity", 1);
@@ -180,7 +182,7 @@
       g.append("rect").attr("x", x(2014)).attr("width", x(2016) - x(2014)).attr("y", 0).attr("height", ih)
         .attr("fill", COLORS.amber).attr("opacity", 0.14);
       g.append("text").attr("x", x(2014) - 6).attr("y", 2).attr("text-anchor", "end")
-        .attr("fill", "#b45309").attr("font-size", "10px").attr("font-weight", "600")
+        .attr("fill", themeWarn()).attr("font-size", "10px").attr("font-weight", "600")
         .text(`2014→2016: ${formatDecimal(p.bed_days_per_case)} → ${formatDecimal(q.bed_days_per_case)} days (cause unconfirmed)`);
     }
 

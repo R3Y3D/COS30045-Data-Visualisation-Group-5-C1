@@ -161,6 +161,56 @@ function chartDelay(ms = 18) {
   return prefersReducedMotion() ? 0 : ms;
 }
 
+// ---------- Light / dark theme ----------
+const THEME_KEY = "cos30045-theme";
+
+function isDarkTheme() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
+function themeInk() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--chart-ink").trim() || "#1e293b";
+}
+function themeMuted() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--chart-muted").trim() || "#475569";
+}
+function themeWarn() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--chart-warn").trim() || "#b45309";
+}
+
+function getPreferredTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
+  } catch (_) { /* ignore */ }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme) {
+  const next = theme === "dark" ? "dark" : "light";
+  if (next === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  else document.documentElement.removeAttribute("data-theme");
+  try { localStorage.setItem(THEME_KEY, next); } catch (_) { /* ignore */ }
+
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    const dark = next === "dark";
+    btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    btn.setAttribute("title", dark ? "Light mode" : "Dark mode");
+    const icon = btn.querySelector(".material-symbols-outlined");
+    if (icon) icon.textContent = dark ? "light_mode" : "dark_mode";
+  }
+  window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } }));
+}
+
+function initThemeToggle() {
+  applyTheme(getPreferredTheme());
+  const btn = document.getElementById("themeToggle");
+  if (!btn || btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", () => applyTheme(isDarkTheme() ? "light" : "dark"));
+}
+
 // ---------- Chart expand / zoom (restored from earlier dashboard) ----------
 let chartExpandBackdrop = null;
 

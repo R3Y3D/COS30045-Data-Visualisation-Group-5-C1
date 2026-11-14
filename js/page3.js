@@ -72,11 +72,13 @@
       }));
       state.years = [...new Set(state.yearRows.map(d => d.year))].sort(d3.ascending);
       bindControls();
+      initThemeToggle();
       initChartExpand();
       renderAll();
       const ro = new ResizeObserver(drawCharts);
       ["#trendChart", "#remotenessChart", "#roadUserChart", "#streamChart"]
         .forEach(sel => ro.observe(document.querySelector(sel)));
+      window.addEventListener("themechange", drawCharts);
     })
     .catch(err => {
       console.error(err);
@@ -262,15 +264,15 @@
         .attr("stroke", COLORS.amber).attr("stroke-dasharray", "3,3");
       const rise = ((b.cases / a.cases) - 1) * 100;
       g.append("text").attr("x", cx - 4).attr("y", -10).attr("text-anchor", "end")
-        .attr("fill", "#b45309").attr("font-size", "10px").attr("font-weight", "600")
+        .attr("fill", themeWarn()).attr("font-size", "10px").attr("font-weight", "600")
         .text(`2020 FN: ${formatPercent(rise)}% vs 2019 (national total fell)`);
     }
 
     // Baseline 100
     g.append("line").attr("x1", 0).attr("x2", iw).attr("y1", y(100)).attr("y2", y(100))
-      .attr("stroke", "#94a3b8").attr("stroke-dasharray", "4,3");
+      .attr("stroke", themeMuted()).attr("stroke-dasharray", "4,3");
     g.append("text").attr("x", 2).attr("y", y(100) - 4)
-      .attr("fill", "#64748b").attr("font-size", "10px").text("2011 = 100");
+      .attr("fill", themeMuted()).attr("font-size", "10px").text("2011 = 100");
 
     const line = d3.line().x(d => x(d.year)).y(d => y(d.index)).curve(d3.curveMonotoneX);
 
@@ -402,7 +404,7 @@
     REMOTE_ORDER.forEach((name, i) => {
       const item = leg.append("g").attr("transform", `translate(${i * 110},0)`);
       item.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", REMOTE_COLORS[name]);
-      item.append("text").attr("x", 14).attr("y", 9).attr("fill", "#475569").attr("font-size", "11px").text(name);
+      item.append("text").attr("x", 14).attr("y", 9).attr("fill", themeMuted()).attr("font-size", "11px").text(name);
     });
   }
 
@@ -464,7 +466,7 @@
       .attr("x2", d => x(d.fnShare))
       .attr("y1", d => y(d.label) + y.bandwidth() / 2)
       .attr("y2", d => y(d.label) + y.bandwidth() / 2)
-      .attr("stroke", "#cbd5e1")
+      .attr("stroke", isDarkTheme() ? "#3d4f6a" : "#cbd5e1")
       .attr("stroke-width", 2)
       .attr("opacity", 0)
       .transition().duration(chartDuration(450)).delay((_, i) => chartDelay(30) * i)
@@ -524,7 +526,7 @@
       .attr("x", 4)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
       .attr("dy", "0.35em")
-      .attr("fill", "#94a3b8")
+      .attr("fill", themeMuted())
       .attr("font-size", "11px")
       .text("n.p.");
   }
@@ -652,7 +654,7 @@
     REMOTE_ORDER.forEach((name, i) => {
       const item = leg.append("g").attr("transform", `translate(${i * 110},0)`);
       item.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", REMOTE_COLORS[name]);
-      item.append("text").attr("x", 14).attr("y", 9).attr("fill", "#475569").attr("font-size", "11px").text(name);
+      item.append("text").attr("x", 14).attr("y", 9).attr("fill", themeMuted()).attr("font-size", "11px").text(name);
     });
   }
 })();
