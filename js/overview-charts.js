@@ -13,8 +13,9 @@
       state.rows = rows.filter(d => Number.isFinite(d.year)).sort((a, b) => a.year - b.year);
       if (!state.rows.length) throw new Error("no rows in file");
       bindControls();
+      initChartExpand();
       renderAll();
-      // Redraw the charts when their boxes change size (window resize)
+      // Redraw the charts when their boxes change size (window resize / expand)
       const ro = new ResizeObserver(drawCharts);
       ["#trendChart", "#stayChart"].forEach(s => ro.observe(document.querySelector(s)));
     })
@@ -120,8 +121,7 @@
 
     g.selectAll("rect.bar").data(rows).join("rect")
       .attr("class", "bar bar-interactive")
-      .attr("x", d => x(d.year)).attr("y", d => y(d[key]))
-      .attr("width", x.bandwidth()).attr("height", d => ih - y(d[key])).attr("rx", 3)
+      .attr("x", d => x(d.year)).attr("y", ih).attr("width", x.bandwidth()).attr("height", 0).attr("rx", 3)
       .attr("fill", d => state.year === null ? (key === "bed_days" ? COLORS.bedDays : COLORS.primary)
         : (state.year === d.year ? COLORS.highlight : COLORS.sky))
       .attr("tabindex", 0).attr("role", "button")
@@ -131,13 +131,17 @@
         `Stay per admission: <b>${formatDecimal(d.bed_days_per_case)} days</b>`))
       .on("mousemove", moveTooltip).on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectYear(d.year))
-      .on("keydown", onKey);
+      .on("keydown", onKey)
+      .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
+      .attr("y", d => y(d[key])).attr("height", d => ih - y(d[key]));
 
     if (iw > 520) {
       g.selectAll("text.val").data(rows).join("text").attr("class", "val")
         .attr("x", d => x(d.year) + x.bandwidth() / 2).attr("y", d => y(d[key]) - 4)
-        .attr("text-anchor", "middle").attr("fill", "#1e293b").attr("font-size", "9px").attr("font-weight", "600")
-        .text(d => formatNumber(d[key]));
+        .attr("text-anchor", "middle").attr("fill", "#1e293b").attr("font-size", "11px").attr("font-weight", "600")
+        .attr("opacity", 0).text(d => formatNumber(d[key]))
+        .transition().duration(chartDuration(400)).delay(chartDuration(200))
+        .attr("opacity", 1);
     }
   }
 
@@ -180,13 +184,20 @@
         .text(`2014→2016: ${formatDecimal(p.bed_days_per_case)} → ${formatDecimal(q.bed_days_per_case)} days (cause unconfirmed)`);
     }
 
-    g.append("path").datum(rows).attr("fill", "none").attr("stroke", COLORS.bedDays).attr("stroke-width", 2.4)
+    const linePath = g.append("path").datum(rows)
+      .attr("fill", "none").attr("stroke", COLORS.bedDays).attr("stroke-width", 2.4)
       .attr("d", d3.line().x(d => x(d.year)).y(d => y(d.bed_days_per_case)).curve(d3.curveMonotoneX));
+    const totalLen = linePath.node().getTotalLength();
+    if (chartDuration() > 0) {
+      linePath.attr("stroke-dasharray", `${totalLen} ${totalLen}`).attr("stroke-dashoffset", totalLen)
+        .transition().duration(chartDuration(700)).ease(d3.easeCubicOut)
+        .attr("stroke-dashoffset", 0);
+    }
 
     g.selectAll("circle").data(rows).join("circle")
       .attr("class", "bar-interactive")
       .attr("cx", d => x(d.year)).attr("cy", d => y(d.bed_days_per_case))
-      .attr("r", d => (state.year === d.year ? 6 : 4))
+      .attr("r", 0)
       .attr("fill", d => (state.year === d.year ? COLORS.highlight : "#fff"))
       .attr("stroke", d => (state.year === d.year ? COLORS.highlight : COLORS.bedDays)).attr("stroke-width", 2.2)
       .attr("tabindex", 0).attr("role", "button")
@@ -195,6 +206,8 @@
         `<strong>${d.year}</strong>Stay per admission: <b>${formatDecimal(d.bed_days_per_case)} days</b><br/>Bed days: <b>${formatNumber(d.bed_days)}</b>`))
       .on("mousemove", moveTooltip).on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectYear(d.year))
-      .on("keydown", onKey);
+      .on("keydown", onKey)
+      .transition().duration(chartDuration(420)).delay((_, i) => chartDuration(280) + chartDelay() * i)
+      .attr("r", d => (state.year === d.year ? 6 : 4));
   }
 })();

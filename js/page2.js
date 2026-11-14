@@ -63,6 +63,7 @@
       state.remoteness = remoteness;
       state.years = [...new Set(state.roadUser.map(d => d.year).filter(Number.isFinite))].sort(d3.ascending);
       bindControls();
+      initChartExpand();
       renderAll();
       const ro = new ResizeObserver(drawCharts);
       ["#roadUserChart", "#ageSexChart", "#stateChart", "#remotenessChart"]
@@ -262,7 +263,7 @@
       .attr("class", "bar bar-interactive")
       .attr("x", 0)
       .attr("y", d => y(d.label))
-      .attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0)
+      .attr("width", 0)
       .attr("height", y.bandwidth())
       .attr("rx", 3)
       .attr("fill", d => {
@@ -282,24 +283,30 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip);
+      .on("mouseleave blur", hideTooltip)
+      .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
+      .attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0);
 
     // Stay labels when showing cases; n.p. markers when missing
     g.selectAll("text.side").data(rows).join("text")
       .attr("class", "side")
-      .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6)
+      .attr("x", 6)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
       .attr("dy", "0.35em")
       .attr("fill", "#475569")
       .attr("font-size", "11px")
       .attr("font-weight", "600")
+      .attr("opacity", 0)
       .text(d => {
         if (!Number.isFinite(d.value)) return "n.p.";
         if (state.metric === "cases" && Number.isFinite(d.bed_days_per_case)) {
           return `${formatDecimal(d.bed_days_per_case)} d`;
         }
         return formatMetric(d.value);
-      });
+      })
+      .transition().duration(chartDuration(400)).delay((_, i) => chartDuration(180) + chartDelay() * i)
+      .attr("opacity", 1)
+      .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6);
   }
 
   // ---------- Chart 2: age × sex population pyramid ----------
@@ -358,15 +365,8 @@
         .attr("y", d => y(d.age))
         .attr("height", y.bandwidth())
         .attr("rx", 2)
-        .attr("x", d => {
-          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
-          if (!Number.isFinite(v)) return side === "male" ? half : 0;
-          return side === "male" ? xScale(v) : 0;
-        })
-        .attr("width", d => {
-          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
-          return Number.isFinite(v) ? Math.abs(xScale(v) - xScale(0)) : 0;
-        })
+        .attr("x", side === "male" ? half : 0)
+        .attr("width", 0)
         .attr("fill", color)
         .attr("tabindex", 0)
         .attr("role", "img")
@@ -383,7 +383,17 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip);
+        .on("mouseleave blur", hideTooltip)
+        .transition().duration(chartDuration()).delay((_, i) => chartDelay() * i).ease(d3.easeCubicOut)
+        .attr("x", d => {
+          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
+          if (!Number.isFinite(v)) return side === "male" ? half : 0;
+          return side === "male" ? xScale(v) : 0;
+        })
+        .attr("width", d => {
+          const v = useStay ? d[side].bed_days_per_case : d[side].cases;
+          return Number.isFinite(v) ? Math.abs(xScale(v) - xScale(0)) : 0;
+        });
     }
 
     bindSide(left, "male", xMale, COLORS.sex.Male);
@@ -459,11 +469,7 @@
       .attr("height", y.bandwidth())
       .attr("rx", 2)
       .attr("fill", d => Number.isFinite(d.value) ? color(d.value) : "#e2e8f0")
-      .attr("opacity", d => {
-        if (state.selectedState && state.selectedState !== d.state) return 0.25;
-        if (state.year !== null && state.year !== d.year) return 0.35;
-        return 1;
-      })
+      .attr("opacity", 0)
       .attr("stroke", d => (state.selectedState === d.state ? COLORS.highlight : "transparent"))
       .attr("stroke-width", d => (state.selectedState === d.state ? 1.5 : 0))
       .attr("tabindex", 0)
@@ -480,7 +486,17 @@
       .on("mousemove", moveTooltip)
       .on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectState(d.state))
-      .on("keydown", onKeyState);
+      .on("keydown", onKeyState)
+      .transition().duration(chartDuration(380)).delay(d => {
+        const yi = years.indexOf(d.year);
+        const si = stateOrder.indexOf(d.state);
+        return chartDelay(8) * (yi + si);
+      })
+      .attr("opacity", d => {
+        if (state.selectedState && state.selectedState !== d.state) return 0.25;
+        if (state.year !== null && state.year !== d.year) return 0.35;
+        return 1;
+      });
 
     // Colour legend
     const legendH = Math.max(40, ih * 0.55);
@@ -534,9 +550,9 @@
     g.selectAll("rect.bar").data(rows).join("rect")
       .attr("class", "bar bar-interactive")
       .attr("x", d => x(d.remoteness))
-      .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
+      .attr("y", ih)
       .attr("width", x.bandwidth())
-      .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0)
+      .attr("height", 0)
       .attr("rx", 3)
       .attr("fill", d => COLORS.remoteness[d.remoteness] || COLORS.slate)
       .attr("tabindex", 0)
@@ -549,7 +565,10 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip);
+      .on("mouseleave blur", hideTooltip)
+      .transition().duration(chartDuration()).delay((_, i) => chartDelay(40) * i).ease(d3.easeCubicOut)
+      .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
+      .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0);
 
     g.selectAll("text.val").data(rows.filter(d => Number.isFinite(d.value))).join("text")
       .attr("x", d => x(d.remoteness) + x.bandwidth() / 2)
@@ -558,6 +577,9 @@
       .attr("fill", "#1e293b")
       .attr("font-size", "11px")
       .attr("font-weight", "700")
-      .text(d => formatDecimal(d.value));
+      .attr("opacity", 0)
+      .text(d => formatDecimal(d.value))
+      .transition().duration(chartDuration(360)).delay(chartDuration(220))
+      .attr("opacity", 1);
   }
 })();

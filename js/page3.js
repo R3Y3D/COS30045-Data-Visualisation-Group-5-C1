@@ -72,6 +72,7 @@
       }));
       state.years = [...new Set(state.yearRows.map(d => d.year))].sort(d3.ascending);
       bindControls();
+      initChartExpand();
       renderAll();
       const ro = new ResizeObserver(drawCharts);
       ["#trendChart", "#remotenessChart", "#roadUserChart", "#streamChart"]
@@ -274,17 +275,23 @@
     const line = d3.line().x(d => x(d.year)).y(d => y(d.index)).curve(d3.curveMonotoneX);
 
     for (const s of series) {
-      g.append("path").datum(s.values)
+      const path = g.append("path").datum(s.values)
         .attr("fill", "none")
         .attr("stroke", STATUS_COLOR[s.status])
         .attr("stroke-width", 2.4)
         .attr("d", line);
+      const len = path.node().getTotalLength();
+      if (chartDuration() > 0) {
+        path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
+          .transition().duration(chartDuration(700)).ease(d3.easeCubicOut)
+          .attr("stroke-dashoffset", 0);
+      }
 
       g.selectAll(null).data(s.values).join("circle")
         .attr("class", "bar-interactive")
         .attr("cx", d => x(d.year))
         .attr("cy", d => y(d.index))
-        .attr("r", d => (state.year === d.year ? 6 : 4))
+        .attr("r", 0)
         .attr("fill", STATUS_COLOR[s.status])
         .attr("tabindex", 0)
         .attr("role", "button")
@@ -301,7 +308,9 @@
             event.preventDefault();
             setYear(state.year === d.year ? null : d.year);
           }
-        });
+        })
+        .transition().duration(chartDuration(400)).delay((_, i) => chartDuration(260) + chartDelay() * i)
+        .attr("r", d => (state.year === d.year ? 6 : 4));
     }
   }
 
@@ -355,8 +364,8 @@
         .attr("class", "bar-interactive")
         .attr("x", d => x(d.status))
         .attr("width", x.bandwidth())
-        .attr("y", d => y(d.y1))
-        .attr("height", d => Math.max(0, y(d.y0) - y(d.y1)))
+        .attr("y", ih)
+        .attr("height", 0)
         .attr("fill", d => REMOTE_COLORS[d.remoteness])
         .attr("tabindex", 0)
         .attr("role", "img")
@@ -368,7 +377,10 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip);
+        .on("mouseleave blur", hideTooltip)
+        .transition().duration(chartDuration()).delay((_, i) => chartDelay(50) * i).ease(d3.easeCubicOut)
+        .attr("y", d => y(d.y1))
+        .attr("height", d => Math.max(0, y(d.y0) - y(d.y1)));
 
       // Label Remote share (story focus) when tall enough
       const remote = group.find(d => d.remoteness === "Remote");
@@ -449,19 +461,23 @@
     g.selectAll("line.conn").data(data.filter(d => Number.isFinite(d.fnShare) && Number.isFinite(d.niShare))).join("line")
       .attr("class", "conn")
       .attr("x1", d => x(d.fnShare))
-      .attr("x2", d => x(d.niShare))
+      .attr("x2", d => x(d.fnShare))
       .attr("y1", d => y(d.label) + y.bandwidth() / 2)
       .attr("y2", d => y(d.label) + y.bandwidth() / 2)
       .attr("stroke", "#cbd5e1")
-      .attr("stroke-width", 2);
+      .attr("stroke-width", 2)
+      .attr("opacity", 0)
+      .transition().duration(chartDuration(450)).delay((_, i) => chartDelay(30) * i)
+      .attr("x2", d => x(d.niShare))
+      .attr("opacity", 1);
 
     function drawDots(key, shareKey, color) {
       g.selectAll(`circle.${key}`).data(data).join("circle")
         .attr("class", `bar-interactive ${key}`)
         .attr("cx", d => Number.isFinite(d[shareKey]) ? x(d[shareKey]) : -999)
         .attr("cy", d => y(d.label) + y.bandwidth() / 2)
-        .attr("r", d => Number.isFinite(d[shareKey]) ? 5.5 : 0)
-        .attr("fill", d => (d[key].suppressed ? color : color))
+        .attr("r", 0)
+        .attr("fill", color)
         .attr("opacity", d => (d[key].suppressed ? 0.75 : 1))
         .attr("stroke", d => (d[key].suppressed ? "#fff" : "none"))
         .attr("stroke-width", d => (d[key].suppressed ? 1.2 : 0))
@@ -485,15 +501,19 @@
           showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
         })
         .on("mousemove", moveTooltip)
-        .on("mouseleave blur", hideTooltip);
+        .on("mouseleave blur", hideTooltip)
+        .transition().duration(chartDuration(420)).delay((_, i) => chartDuration(120) + chartDelay(30) * i)
+        .attr("r", d => Number.isFinite(d[shareKey]) ? 5.5 : 0);
 
       // Hatch overlay for suppressed published values
       g.selectAll(`circle.hatch-${key}`).data(data.filter(d => d[key].suppressed && Number.isFinite(d[shareKey]))).join("circle")
         .attr("cx", d => x(d[shareKey]))
         .attr("cy", d => y(d.label) + y.bandwidth() / 2)
-        .attr("r", 5.5)
+        .attr("r", 0)
         .attr("fill", "url(#hatch-fn)")
-        .attr("pointer-events", "none");
+        .attr("pointer-events", "none")
+        .transition().duration(chartDuration(420)).delay(chartDuration(160))
+        .attr("r", 5.5);
     }
 
     drawDots("fn", "fnShare", STATUS_COLOR[FN]);
@@ -566,7 +586,7 @@
     g.selectAll("path.layer").data(stacked).join("path")
       .attr("class", "layer bar-interactive")
       .attr("fill", (d, i) => REMOTE_COLORS[REMOTE_ORDER[i]])
-      .attr("opacity", 0.92)
+      .attr("opacity", 0)
       .attr("d", area)
       .attr("tabindex", 0)
       .attr("role", "img")
@@ -582,7 +602,9 @@
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip);
+      .on("mouseleave blur", hideTooltip)
+      .transition().duration(chartDuration(650)).delay((_, i) => chartDelay(80) * i).ease(d3.easeCubicOut)
+      .attr("opacity", 0.92);
 
     // Hover bands by year for precise tooltips
     g.selectAll("rect.year-hit").data(years).join("rect")

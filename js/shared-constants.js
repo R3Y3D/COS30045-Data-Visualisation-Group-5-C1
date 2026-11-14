@@ -149,3 +149,83 @@ function setChartNote(containerId, message) {
 function chartWidth(host, preferred = 640) {
   return Math.max(320, Math.min(preferred, host.node()?.getBoundingClientRect().width || preferred));
 }
+
+/** Motion helpers — duration is 0 when the user prefers reduced motion. */
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+function chartDuration(ms = 520) {
+  return prefersReducedMotion() ? 0 : ms;
+}
+function chartDelay(ms = 18) {
+  return prefersReducedMotion() ? 0 : ms;
+}
+
+// ---------- Chart expand / zoom (restored from earlier dashboard) ----------
+let chartExpandBackdrop = null;
+
+function closeExpandedChart() {
+  d3.selectAll(".chart-card.is-expanded").classed("is-expanded", false);
+  d3.selectAll(".btn-expand")
+    .attr("title", "Expand chart")
+    .attr("aria-label", "Expand chart")
+    .select(".material-symbols-outlined")
+    .text("open_in_full");
+  if (chartExpandBackdrop) chartExpandBackdrop.classed("is-open", false);
+  document.body.classList.remove("no-scroll");
+}
+
+function toggleExpandedChart(card) {
+  const wasOpen = card.classList.contains("is-expanded");
+  closeExpandedChart();
+  if (wasOpen) return;
+  card.classList.add("is-expanded");
+  d3.select(card).select(".btn-expand")
+    .attr("title", "Close expanded chart")
+    .attr("aria-label", "Close expanded chart")
+    .select(".material-symbols-outlined")
+    .text("close_fullscreen");
+  if (chartExpandBackdrop) chartExpandBackdrop.classed("is-open", true);
+  document.body.classList.add("no-scroll");
+}
+
+/** Add an expand button to every .chart-card header (Escape / backdrop close). */
+function initChartExpand() {
+  if (!chartExpandBackdrop) {
+    chartExpandBackdrop = d3.select("body")
+      .append("div")
+      .attr("class", "backdrop")
+      .on("click", closeExpandedChart);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closeExpandedChart();
+    });
+  }
+
+  d3.selectAll(".chart-card").each(function () {
+    const card = this;
+    const header = d3.select(card).select(".chart-header");
+    if (header.empty() || !header.select(".btn-expand").empty()) return;
+
+    let actions = header.select(".chart-actions");
+    if (actions.empty()) {
+      actions = header.append("div").attr("class", "chart-actions");
+      // Keep existing controls (metric toggle) next to the expand button
+      Array.from(header.node().children).forEach(child => {
+        if (child.classList && child.classList.contains("toggle")) {
+          actions.node().appendChild(child);
+        }
+      });
+    }
+
+    const badge = header.select(".chart-badge").node();
+    if (badge) actions.node().appendChild(badge);
+
+    actions.append("button")
+      .attr("type", "button")
+      .attr("class", "btn-expand")
+      .attr("title", "Expand chart")
+      .attr("aria-label", "Expand chart")
+      .html('<span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>')
+      .on("click", () => toggleExpandedChart(card));
+  });
+}
