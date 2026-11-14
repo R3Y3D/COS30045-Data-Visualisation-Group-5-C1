@@ -26,27 +26,27 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --text-main: #e8eef7;
-  --text-muted: #9aabc2;
-  --text-heading: #f1f5fb;
-  --border-color: #2c3b55;
-  --blue-dark: #3d7fd4;
-  --blue: #5ba3e8;
-  --blue-light: #7ec8f5;
+  --text-main: #f5f8fc;
+  --text-muted: #d2ddec;
+  --text-heading: #ffffff;
+  --border-color: #3a4d6a;
+  --blue-dark: #4d8fe0;
+  --blue: #8ec8ff;
+  --blue-light: #a8d8ff;
   --page-bg: linear-gradient(180deg, #0b1424 0%, #111c31 40%, #15233a 100%);
-  --card-bg: #182338;
+  --card-bg: #1a2740;
   --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-  --control-bg: #1e2d45;
-  --control-text: #c5d0e0;
-  --axis-stroke: #2f405c;
-  --grid-stroke: #2a3a52;
-  --axis-text: #9aabc2;
-  --badge-bg: #243552;
-  --expand-bg: #1e2d45;
-  --footer-text: #8a9bb3;
-  --chart-ink: #e2e8f0;
-  --chart-muted: #94a3b8;
-  --chart-warn: #f0b45a;
+  --control-bg: #243552;
+  --control-text: #e8eef7;
+  --axis-stroke: #3a4d6a;
+  --grid-stroke: #314560;
+  --axis-text: #d2ddec;
+  --badge-bg: #2a3f5c;
+  --expand-bg: #243552;
+  --footer-text: #c5d0e0;
+  --chart-ink: #ffffff;
+  --chart-muted: #d2ddec;
+  --chart-warn: #ffc857;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -515,6 +515,51 @@ html[data-theme="dark"] .chart-error {
   border-color: #7a3348;
   background: #2a1820;
   color: #f3a7bc;
+}
+
+/* Hard dark-mode text contrast (beats stale/hardcoded light-theme colors) */
+html[data-theme="dark"] .brand-title,
+html[data-theme="dark"] .p1-story h2,
+html[data-theme="dark"] .p2-intro h2,
+html[data-theme="dark"] .p3-intro h2,
+html[data-theme="dark"] .chart-title {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .brand-subtitle {
+  color: #9fd0ff !important;
+}
+html[data-theme="dark"] .p1-sub,
+html[data-theme="dark"] .p2-sub,
+html[data-theme="dark"] .p3-sub,
+html[data-theme="dark"] .chart-subtitle,
+html[data-theme="dark"] .chart-insight,
+html[data-theme="dark"] .chart-legend,
+html[data-theme="dark"] .legend-inline,
+html[data-theme="dark"] .chart-note,
+html[data-theme="dark"] .data-scope,
+html[data-theme="dark"] .footer-bar {
+  color: #d7e2f2 !important;
+}
+html[data-theme="dark"] .tab {
+  color: #f3f7ff !important;
+}
+html[data-theme="dark"] .tab:not(.is-active) {
+  color: rgba(243, 247, 255, 0.88) !important;
+}
+html[data-theme="dark"] .axis text {
+  fill: #d7e2f2 !important;
+}
+html[data-theme="dark"] .toggle button {
+  color: #e8eef7 !important;
+}
+html[data-theme="dark"] .toggle button[aria-pressed="true"] {
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .year-rail button {
+  color: #e8eef7 !important;
+}
+html[data-theme="dark"] .year-rail button[aria-pressed="true"] {
+  color: #ffffff !important;
 }
 
 .fit-shell .footer-bar { padding: 0 2px; font-size: 0.66rem; }
