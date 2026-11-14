@@ -365,3 +365,77 @@ body.no-scroll { overflow: hidden; }
   font-size: 0.78rem;
   line-height: 1.5;
 }
+
+
+html, body { height: 100%; overflow: hidden; }
+
+/* The whole page is exactly one viewport tall, so nothing scrolls */
+.fit-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  width: min(100%, 1760px);
+  height: 100vh;
+  margin: 0 auto;
+  padding: 0 var(--pad) 8px;
+}
+.fit-shell .topbar { margin-bottom: 0; }
+.fit-shell .brand-logo { height: 52px; }
+
+.p1-main {
+  display: grid;
+  grid-template-columns: minmax(250px, 27%) minmax(0, 1fr);
+  gap: 14px;
+  min-height: 0;
+}
+
+/* Left: the story */
+.p1-story { display: flex; flex-direction: column; gap: 12px; min-height: 0; padding: 6px 2px 0; }
+.p1-story h2 { font-size: clamp(1.35rem, 2.3vw, 2.2rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.15; color: #12203a; }
+.p1-sub { color: #475569; font-size: 0.92rem; line-height: 1.55; max-width: 46ch; }
+.p1-kpis { display: grid; gap: 10px; margin-top: auto; }
+.p1-kpis .kpi-card { min-height: 0; padding: 12px 16px; border-radius: 14px; }
+.p1-kpis .kpi-value { font-size: clamp(1.25rem, 1.7vw, 1.75rem); }
+
+.btn-next {
+  display: block;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: var(--blue-dark);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+.btn-next:hover { background: var(--blue); }
+.btn-next:focus-visible, .toggle button:focus-visible, .p1-charts [tabindex]:focus-visible {
+  outline: 3px solid rgba(51, 177, 240, 0.6);
+  outline-offset: 2px;
+}
+
+/* Right: two charts that share the remaining height */
+.p1-charts { display: grid; grid-template-rows: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; min-height: 0; }
+.p1-charts .chart-card { min-height: 0; padding: 12px 16px 8px; }
+
+/* The svg fills its box and never changes the box's size (avoids resize loops) */
+.p1-charts .svg-container { min-height: 0; overflow: hidden; }
+.p1-charts .svg-container svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.toggle { display: inline-flex; flex-shrink: 0; border: 1px solid var(--border-color); border-radius: 999px; overflow: hidden; }
+.toggle button { padding: 6px 14px; border: 0; background: #fff; color: #475569; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--blue-dark); color: #fff; }
+
+.fit-shell .footer-bar { padding: 0 2px; font-size: 0.66rem; }
+
+/* Short laptop screens: drop the KPI cards so the charts keep their room */
+@media (max-height: 720px) {
+  .p1-kpis { display: none; }
+  .fit-shell .brand-logo { height: 40px; }
+}
+
+/* Narrow screens: stack the story above the charts, still without scrolling */
+@media (max-width: 900px) {
+  .p1-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .p1-kpis, .p1-sub, .btn-next { display: none; }
+}
