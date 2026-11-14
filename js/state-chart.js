@@ -1,7 +1,8 @@
 // Chart 2: State & Territory Comparison (NSW, Vic, Qld, WA, SA, Tas, NT, ACT)
-// Source: Data/Cleaned_CSV_Files/Temporal Trends & State Comparisons.csv
+// Source: Data/Cleaned_CSV/state_territory/state_year.csv
 
 function drawStateChart() {
+  setChartNote("stateChart", "Jurisdiction cases and bed days exclude deaths in hospital within 30 days. National and jurisdiction totals use different source coverage.");
   const container = d3.select("#stateChart");
   container.selectAll("*").remove();
 
@@ -27,7 +28,7 @@ function drawStateChart() {
     share: (counts[metric] / totalMetric) * 100
   })).sort((a, b) => d3.descending(a.value, b.value));
 
-  const width = 500;
+  const width = chartWidth(container, 640);
   const height = 215;
   const margin = { top: 20, right: 16, bottom: 28, left: 48 };
   const innerWidth = width - margin.left - margin.right;
@@ -89,7 +90,7 @@ function drawStateChart() {
          Cases: <b>${formatNumber(d.hospitalisations)}</b><br/>
          Bed Days: <b>${formatNumber(d.bed_days)}</b><br/>
          Share: <b>${d.share.toFixed(1)}%</b><br/>
-         Avg. Stay: <b>${formatDecimal(alos)} days</b><br/>
+         Bed days per case: <b>${formatDecimal(alos)}</b><br/>
          <span style="color:#94a3b8;font-size:10px;">Click to highlight state</span>`
       );
     })

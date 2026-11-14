@@ -85,7 +85,7 @@ function updateKPIs() {
   d3.select("#fnStatusControl").property("hidden", appState.view !== "firstnations");
   const scope = appState.selectedState === "All" ? "National category summaries." : `${appState.selectedState} selected for road-user, counterparty, age and sex breakdowns; jurisdiction tables exclude deaths in hospital within 30 days.`;
   d3.select("#dataScope").text(appState.view === "firstnations"
-    ? `${appState.fnStatus} breakdowns. Annual chart compares both reported status groups. First Nations bed days exclude deaths in hospital within 30 days.`
+    ? `${appState.fnStatus} breakdowns. Annual chart compares both reported status groups. Indigenous-status table bed days exclude deaths in hospital within 30 days.`
     : `${scope} KPI cards, overview trends and regional charts retain Australia-wide coverage.`);
   d3.selectAll("#card-roaduser .chart-subtitle, #card-roaduser-table .chart-subtitle").text(`${categoryScopeLabel()} · top categories in chart; full published breakdown in table`);
   d3.select("#card-counterparty .chart-subtitle").text(`${categoryScopeLabel()} · collision counterparts and non-collision events`);
@@ -175,6 +175,11 @@ function initTabs() {
   document.addEventListener("keydown", event => { if (event.key === "Escape") closeExpanded(); });
   d3.selectAll(".tab").on("click", function (event) { event.preventDefault(); setView(this.dataset.view); });
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), false));
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateDashboard, 120);
+  });
 }
 
 async function loadDashboard() {

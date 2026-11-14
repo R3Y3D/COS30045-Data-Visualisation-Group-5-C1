@@ -40,7 +40,7 @@
       <div class="control-item">
         <label for="filterMetric">Metric</label>
         <select id="filterMetric">
-          <option value="hospitalisations">Hospitalisations (Cases)</option>
+          <option value="hospitalisations">Cases</option>
           <option value="bed_days">Hospital Bed Days</option>
         </select>
       </div>
@@ -53,47 +53,56 @@
       <div class="control-item">
         <label for="filterState">Jurisdiction</label>
         <select id="filterState">
-          <option value="All">All States</option>
+          <option value="All">Australia / all jurisdictions</option>
+        </select>
+      </div>
+      <div class="control-item" id="fnStatusControl" hidden>
+        <label for="filterFnStatus">Population group</label>
+        <select id="filterFnStatus">
+          <option value="First Nations people">First Nations people</option>
+          <option value="Non-Indigenous">Non-Indigenous</option>
         </select>
       </div>
     </section>
+    <p id="loadStatus" class="data-scope" role="status">Loading the current hospitalised injury data…</p>
+    <p id="dataScope" class="data-scope" aria-live="polite">KPI cards show Australia-wide totals.</p>
 
     <!-- KPI gradient cards -->
     <section class="kpi-strip" aria-label="Key Performance Indicators">
       <div class="kpi-card kpi-1">
         <span class="kpi-label">Hospitalisations</span>
-        <span class="kpi-value" id="kpiHospitalisations">410,884</span>
-        <span class="kpi-sub" id="kpiHospitalisationsSub">11-year national total</span>
+        <span class="kpi-value" id="kpiHospitalisations">—</span>
+        <span class="kpi-sub" id="kpiHospitalisationsSub">National total</span>
       </div>
       <div class="kpi-card kpi-2">
         <span class="kpi-label">Bed days</span>
-        <span class="kpi-value" id="kpiBedDays">2,018,891</span>
-        <span class="kpi-sub" id="kpiBedDaysSub">Avg. 183,536 / year</span>
+        <span class="kpi-value" id="kpiBedDays">—</span>
+        <span class="kpi-sub" id="kpiBedDaysSub">National inpatient bed days</span>
       </div>
       <div class="kpi-card kpi-3">
-        <span class="kpi-label">Avg. length of stay</span>
-        <span class="kpi-value" id="kpiAlos">4.91 days</span>
-        <span class="kpi-sub" id="kpiAlosSub">Mean stay per admission</span>
+        <span class="kpi-label">Bed days per case</span>
+        <span class="kpi-value" id="kpiAlos">—</span>
+        <span class="kpi-sub" id="kpiAlosSub">National average</span>
       </div>
       <div class="kpi-card kpi-4">
         <span class="kpi-label">Change 2011 &rarr; 2021</span>
-        <span class="kpi-value" id="kpiChange">+16.1%</span>
-        <span class="kpi-sub" id="kpiChangeSub">34,033 &rarr; 39,505</span>
+        <span class="kpi-value" id="kpiChange">—</span>
+        <span class="kpi-sub" id="kpiChangeSub">National change</span>
       </div>
       <div class="kpi-card kpi-5">
         <span class="kpi-label">Peak year</span>
-        <span class="kpi-value" id="kpiPeak">2019</span>
-        <span class="kpi-sub" id="kpiPeakSub">39,866</span>
+        <span class="kpi-value" id="kpiPeak">—</span>
+        <span class="kpi-sub" id="kpiPeakSub">National series</span>
       </div>
       <div class="kpi-card kpi-6">
-        <span class="kpi-label">Top road user</span>
-        <span class="kpi-value" id="kpiTopUser">Car driver</span>
-        <span class="kpi-sub" id="kpiTopUserSub">32.9% of total</span>
+        <span class="kpi-label">Top national road user</span>
+        <span class="kpi-value" id="kpiTopUser">—</span>
+        <span class="kpi-sub" id="kpiTopUserSub">National series</span>
       </div>
       <div class="kpi-card kpi-7">
         <span class="kpi-label">Top jurisdiction</span>
-        <span class="kpi-value" id="kpiTopState">NSW</span>
-        <span class="kpi-sub" id="kpiTopStateSub">Largest share</span>
+        <span class="kpi-value" id="kpiTopState">—</span>
+        <span class="kpi-sub" id="kpiTopStateSub">Jurisdiction-table series</span>
       </div>
     </section>
 
@@ -127,7 +136,7 @@
       <div class="chart-card" id="card-alos">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">Average length of stay by year</h2>
+            <h2 class="chart-title">Bed days per case by year</h2>
             <p class="chart-subtitle">Bed days per hospitalisation &bull; dashed line = 11-year average</p>
           </div>
           <span class="chart-badge ">Days per admission</span>
@@ -184,7 +193,7 @@
       <div class="chart-card" id="card-roaduser">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">Road user vulnerability</h2>
+            <h2 class="chart-title">Road user hospitalisation burden</h2>
             <p class="chart-subtitle">Top 7 road user categories</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
@@ -196,7 +205,7 @@
         <div class="chart-header">
           <div>
             <h2 class="chart-title">Crash counterparty analysis</h2>
-            <p class="chart-subtitle">What the vehicle collided with</p>
+            <p class="chart-subtitle">Collision counterparts and non-collision events</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
@@ -288,18 +297,19 @@
       <div class="chart-card" id="card-fn-annual">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">First Nations vs. Non-Indigenous Hospitalisations</h2>
+            <h2 class="chart-title">Hospitalised injuries by Indigenous status</h2>
             <p class="chart-subtitle">Annual injury trend comparison (2011–2021)</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
         </div>
+        <div id="fnAnnualLegend" class="chart-legend"></div>
         <div id="fnAnnualChart" class="svg-container"></div>
       </div>
 
       <div class="chart-card" id="card-fn-remoteness">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">First Nations Hospitalisations by Remoteness</h2>
+            <h2 class="chart-title">Remoteness by population group</h2>
             <p class="chart-subtitle">Major Cities, Regional, and Remote regions</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
@@ -310,7 +320,7 @@
       <div class="chart-card" id="card-fn-roaduser">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">First Nations Road User Vulnerability</h2>
+            <h2 class="chart-title">Road users by population group</h2>
             <p class="chart-subtitle">Breakdown by transport category</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
@@ -321,7 +331,7 @@
       <div class="chart-card" id="card-fn-age">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">First Nations Age Profile</h2>
+            <h2 class="chart-title">Age profile by population group</h2>
             <p class="chart-subtitle">Injury counts across age demographics</p>
           </div>
           <span class="chart-badge metric-badge">Hospitalisations</span>
@@ -329,18 +339,30 @@
         <div id="fnAgeChart" class="svg-container"></div>
       </div>
 
+      <div class="chart-card" id="card-fn-counterparty">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Counterparty by population group</h2>
+            <p class="chart-subtitle">Collision counterparts and non-collision events</p>
+          </div>
+          <span class="chart-badge metric-badge">Cases</span>
+        </div>
+        <div id="fnCounterpartyChart" class="svg-container"></div>
+      </div>
+
     </main>
 
     <footer class="footer-bar">
       <span><strong>COS30045 Group 5 (C1):</strong> Ibrahim Mahbub (105684360) &bull; Darrshan A/L Muraleesvaran (105965528) &bull; Nasrul Aman bin Abdul Rashid (105556595)</span>
-      <span>Counts show hospitalisation burden, not exposure-adjusted risk. NSW/Victoria reporting changes and 2020 mobility restrictions affect comparisons.</span>
+      <span>Counts show hospitalisation burden, not exposure-adjusted risk. Source coverage differs across national, jurisdiction and Indigenous-status tables. † Published subtotal; — unavailable or withheld.</span>
     </footer>
 
   </div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="js/data-fallback.js"></script>
+  <script src="js/data-model.js"></script>
   <script src="js/shared-constants.js"></script>
+  <script src="js/category-charts.js"></script>
   <script src="js/trend-chart.js"></script>
   <script src="js/state-chart.js"></script>
   <script src="js/road-user-chart.js"></script>

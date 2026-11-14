@@ -1,5 +1,5 @@
 // Chart 4: ABS Remoteness Area Trends (Major Cities, Regional, Remote)
-// Source: Data/Cleaned_CSV_Files/remoteness_yearly_trends.csv
+// Source: Data/Cleaned_CSV/hospitilisation/national_remoteness.csv
 
 function drawRemotenessChart() {
   const container = d3.select("#remotenessChart");
@@ -35,9 +35,10 @@ function drawRemotenessChart() {
     return { category: cat, values, total };
   });
 
-  const grandTotal = d3.sum(seriesList, s => s.total) || 1;
+  // Keep Missing in the denominator, consistent with the regional breakdown table.
+  const grandTotal = d3.sum(filterByYear(appState.remotenessAnnual), d => d[appState.metric]) || 1;
 
-  const width = 500;
+  const width = chartWidth(container, 640);
   const height = 195;
   const margin = { top: 14, right: 18, bottom: 26, left: 48 };
   const innerWidth = width - margin.left - margin.right;
@@ -129,6 +130,7 @@ function drawRemotenessChart() {
   });
 
   const legend = d3.select("#remotenessLegend");
+  setChartNote("remotenessChart", "Missing-area records are omitted from the lines but retained in percentage denominators and the breakdown table.");
   legend.selectAll("*").remove();
 
   seriesList.forEach(s => {

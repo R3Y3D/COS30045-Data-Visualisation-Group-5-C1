@@ -13,7 +13,7 @@ const appState = {
 
   // Normalised rows from the current national, jurisdiction and First Nations exports.
   nationalAnnual: [],     // national_annual.csv
-  stateAnnual: [],        // Temporal Trends & State Comparisons.csv
+  stateAnnual: [],        // state_territory/state_year.csv
   roadUserAnnual: [],
   remotenessAnnual: [],
   ageGroupAnnual: [],
@@ -73,7 +73,7 @@ const formatDecimal = value => Number.isFinite(value) ? d3.format(",.2f")(value)
 const formatPercent = value => Number.isFinite(value) ? d3.format("+.1f")(value) : "—";
 
 function getMetricLabel(metric = appState.metric) {
-  return metric === "bed_days" ? "Bed Days" : "Hospitalisations";
+  return metric === "bed_days" ? "Bed days" : "Cases";
 }
 
 let tooltipEl = null;
@@ -126,7 +126,7 @@ function getFnRows(key, applyYear = true) {
 
 function metricText(row, metric = appState.metric) {
   const value = row[metric];
-  if (!Number.isFinite(value)) return "Suppressed / unavailable";
+  if (!Number.isFinite(value) || (value === 0 && (row[metric + "_partial"] || row.suppressed))) return "Suppressed / unavailable";
   return formatNumber(value) + (row[metric + "_partial"] || row.suppressed ? "†" : "");
 }
 
@@ -144,4 +144,8 @@ function suppressionNote(rows) {
 function setChartNote(containerId, message) {
   const card = d3.select("#" + containerId).node()?.closest(".chart-card");
   if (card) d3.select(card).selectAll(".chart-note").data([message]).join("p").attr("class", "chart-note").text(message);
+}
+
+function chartWidth(host, preferred = 640) {
+  return Math.max(320, Math.min(preferred, host.node()?.getBoundingClientRect().width || preferred));
 }

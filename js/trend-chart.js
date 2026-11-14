@@ -1,5 +1,5 @@
 // Chart 1: National Annual Trajectory (2011–2021) — bar style like the reference dashboard
-// Source: Data/Cleaned_CSV_Files/national_annual.csv
+// Source: Data/Cleaned_CSV/hospitilisation/national_annual.csv
 
 function drawTrendChart() {
   const container = d3.select("#trendChart");
@@ -15,7 +15,7 @@ function drawTrendChart() {
     value: d[metric]
   }));
 
-  const width = 500;
+  const width = chartWidth(container, 640);
   const height = 215;
   const margin = { top: 22, right: 16, bottom: 28, left: 52 };
   const innerWidth = width - margin.left - margin.right;
@@ -54,31 +54,8 @@ function drawTrendChart() {
     .attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => d >= 1000 ? d3.format("~s")(d) : d));
 
-  // Annotations: 2017 NSW Break & 2020 COVID-19 Dip (drawn behind the bars)
+  // Values and highlights come from the current national series.
   const mid = year => x(year) + x.bandwidth() / 2;
-
-  if (x(2017) !== undefined) {
-    g.append("line")
-      .attr("x1", mid(2017)).attr("x2", mid(2017))
-      .attr("y1", 0).attr("y2", innerHeight)
-      .attr("stroke", "#94a3b8").attr("stroke-dasharray", "3,3");
-    g.append("text")
-      .attr("x", mid(2017) + 4).attr("y", 8)
-      .attr("fill", "#64748b").attr("font-size", "9px")
-      .text("2017 NSW Break");
-  }
-
-  if (x(2020) !== undefined) {
-    g.append("line")
-      .attr("x1", mid(2020)).attr("x2", mid(2020))
-      .attr("y1", 0).attr("y2", innerHeight)
-      .attr("stroke", COLORS.amber).attr("stroke-dasharray", "3,3");
-    g.append("text")
-      .attr("x", mid(2020) - 4).attr("y", 8)
-      .attr("text-anchor", "end")
-      .attr("fill", "#b45309").attr("font-size", "9px")
-      .text("COVID Dip");
-  }
 
   g.selectAll(".trend-bar")
     .data(series)
@@ -100,7 +77,7 @@ function drawTrendChart() {
         `<strong>Year ${d.year}</strong>
          Hospitalisations: <b>${formatNumber(d.hospitalisations)}</b><br/>
          Bed Days: <b>${formatNumber(d.bed_days)}</b><br/>
-         Avg. Stay: <b>${formatDecimal(alos)} days</b><br/>
+         Bed days per case: <b>${formatDecimal(alos)}</b><br/>
          <span style="color:#94a3b8;font-size:10px;">Click to filter year</span>`
       );
     })
@@ -113,7 +90,7 @@ function drawTrendChart() {
     });
 
   // Value labels on 2011, 2019, 2020, 2021
-  const labelYears = new Set([2011, 2019, 2020, 2021]);
+  const labelYears = new Set(width < 450 ? [2011, 2021] : [2011, 2019, 2020, 2021]);
   g.selectAll(".val-lbl")
     .data(series.filter(d => labelYears.has(d.year)))
     .join("text")

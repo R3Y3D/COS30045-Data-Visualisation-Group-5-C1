@@ -22,6 +22,11 @@ body {
 }
 
 button, select { font: inherit; }
+[hidden] { display: none !important; }
+.control-item select:disabled { cursor: default; opacity: 0.6; }
+.data-scope { color: #4a586d; font-size: 0.78rem; line-height: 1.5; }
+.chart-note { margin-top: 10px; color: #5d6b80; font-size: 0.73rem; line-height: 1.5; }
+.heat-table th:focus-visible, .heat-table tr:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
 
 .dashboard-shell {
   width: min(100%, 1760px);
@@ -312,6 +317,8 @@ body.no-scroll { overflow: hidden; }
 @media (max-width: 760px) {
   .charts-grid .chart-card.is-expanded { inset: 2vh 2vw; padding: 16px 14px 12px; }
   .charts-grid .chart-card.is-solo { min-height: 380px; }
+  .responsive-chart { flex: 0 0 auto; }
+  .responsive-chart svg { height: auto; }
 }
 
 /* ---------- Heat-map tables ---------- */

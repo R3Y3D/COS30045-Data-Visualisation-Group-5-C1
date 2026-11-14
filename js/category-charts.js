@@ -7,7 +7,7 @@ const SHORT_LABELS = {
   "Non-collision transport accident": "Non-collision accident",
   "Fixed or stationary object": "Fixed / stationary object",
   "Other and unspecified transport accidents": "Other / unspecified",
-  "2- or 3- wheeled motor vehicle": "2- / 3-wheeled motor vehicle",
+  "2- or 3- wheeled motor vehicle": "2- / 3-wheel motor",
   "intersex or indeterminate or missing": "Intersex / indeterminate / missing"
 };
 function escapeHTML(value) {
@@ -30,10 +30,10 @@ function drawHorizontalCategories(id, rows, key, options = {}) {
   const data = RoadData.categoryRows(rows, key, appState.metric)
     .sort((a, b) => (visibleMetric(b) ?? -1) - (visibleMetric(a) ?? -1))
     .slice(0, options.limit || Infinity);
-  const width = 640, height = Math.max(235, data.length * 30 + 46);
-  const margin = { top: 8, right: 122, bottom: 28, left: 195 };
+  const width = chartWidth(host), height = Math.max(235, data.length * 30 + 46);
+  const margin = { top: 8, right: width < 500 ? 112 : 122, bottom: 28, left: width < 500 ? 125 : 195 };
   const w = width - margin.left - margin.right, h = height - margin.top - margin.bottom;
-  host.style("min-height", `${height}px`);
+  host.classed("responsive-chart", true).style("min-height", `${height}px`);
   const svg = host.append("svg").attr("viewBox", `0 0 ${width} ${height}`)
     .attr("role", "img").attr("aria-label", `${options.title || key}: ${getMetricLabel()}`);
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -71,7 +71,8 @@ function drawVerticalCategories(id, rows, key, options = {}) {
     const ai = order.indexOf(a.label), bi = order.indexOf(b.label);
     return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
   });
-  const width = 560, height = 235;
+  const width = chartWidth(host, 560), height = 235;
+  host.classed("responsive-chart", true).style("min-height", `${height}px`);
   const margin = { top: 24, right: 18, bottom: 28, left: 54 };
   const w = width - margin.left - margin.right, h = height - margin.top - margin.bottom;
   const svg = host.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("role", "img")

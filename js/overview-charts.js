@@ -1,6 +1,7 @@
 // Overview-only charts: Male vs Female by year (grouped bars) and Average length of stay by year (line)
 
 function drawSexTrendChart() {
+  setChartNote("sexTrendChart", "This trend compares Male and Female records. Other source classifications are retained in the Demographics view and sex table.");
   const container = d3.select("#sexTrendChart");
   container.selectAll("*").remove();
 
@@ -16,7 +17,7 @@ function drawSexTrendChart() {
     return row;
   });
 
-  const width = 500, height = 215;
+  const width = chartWidth(container, 640), height = 215;
   const margin = { top: 14, right: 16, bottom: 28, left: 52 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -95,7 +96,7 @@ function drawAlosChart() {
   const totalH = d3.sum(series, d => d.hospitalisations) || 1;
   const avg = d3.sum(series, d => d.bed_days) / totalH;
 
-  const width = 500, height = 215;
+  const width = chartWidth(container, 640), height = 215;
   const margin = { top: 20, right: 20, bottom: 28, left: 40 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -140,7 +141,7 @@ function drawAlosChart() {
       showTooltip(
         event,
         `<strong>Year ${d.year}</strong>
-         Avg. stay: <b>${formatDecimal(d.value)} days</b><br/>
+         Bed days per case: <b>${formatDecimal(d.value)}</b><br/>
          Hospitalisations: <b>${formatNumber(d.hospitalisations)}</b><br/>
          Bed days: <b>${formatNumber(d.bed_days)}</b><br/>
          <span style="color:#94a3b8;font-size:10px;">Click to filter year</span>`
