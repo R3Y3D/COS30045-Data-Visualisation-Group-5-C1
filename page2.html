@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Who is hurt, and where | Road crash hospitalised injuries 2011–2021</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/page2.css">
+</head>
+<body>
+  <div class="fit-shell">
+
+    <header class="topbar">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/logo.png" alt="Dashboard logo">
+        <div class="brand-text">
+          <h1 class="brand-title">Road crash hospitalised injuries</h1>
+          <p class="brand-subtitle">Australia 2011–2021 &bull; COS30045 Group 5</p>
+        </div>
+      </div>
+      <nav class="tabbar" aria-label="Story pages">
+        <a class="tab" href="index.html">1 The national picture</a>
+        <a class="tab is-active" href="page2.html" aria-current="page">2 Who is hurt, and where</a>
+        <a class="tab" href="page3.html">3 First Nations</a>
+      </nav>
+    </header>
+
+    <main class="p2-main">
+      <div class="p2-intro">
+        <div>
+          <h2 id="headline">Who is hurt, and where</h2>
+          <p id="subline" class="p2-sub">
+            Motorcyclists and pedal cyclists are 40.8% of cases. Stays lengthen with age,
+            and NSW, Victoria and Queensland dominate the state totals.
+          </p>
+        </div>
+        <div class="p2-controls">
+          <div id="yearRail" class="year-rail" role="group" aria-label="Select year"></div>
+          <div class="toggle" role="group" aria-label="Measure">
+            <button type="button" id="btnCases" aria-pressed="true">Cases</button>
+            <button type="button" id="btnStay" aria-pressed="false">Bed days / admission</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="p2-grid" aria-label="Demographic and place charts">
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Road user</h2>
+              <p class="chart-subtitle">Sorted bars; stay length shown as a label</p>
+            </div>
+          </div>
+          <div id="roadUserChart" class="svg-container"></div>
+          <p class="chart-insight">Pedal cyclists grew +51% but stay ~3 days; pedestrians stay ~9 days.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Age and sex</h2>
+              <p class="chart-subtitle">Population pyramid — male left, female right</p>
+            </div>
+          </div>
+          <div id="ageSexChart" class="svg-container"></div>
+          <p class="chart-insight">65% of cases are male. Stays rise from ~3 days (8–16) to ~10 days (75+).</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">States and territories</h2>
+              <p class="chart-subtitle">Click a state to highlight it across years</p>
+            </div>
+          </div>
+          <div id="stateChart" class="svg-container"></div>
+          <p class="chart-insight">Series breaks: Victoria from 2012; NSW from June 2017.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Remoteness</h2>
+              <p class="chart-subtitle">Bed days per admission by area of residence</p>
+            </div>
+          </div>
+          <div id="remotenessChart" class="svg-container"></div>
+          <p class="chart-insight">Regional (5.5) and Remote (5.3) stays exceed Major Cities (4.6).</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer-bar">
+      <span>Counts of hospitalisations, not rates per person. Remoteness is based on the person’s residence, not where the crash happened.</span>
+      <span>Source: BITRE hospitalised injury data, September 2023. State totals are not added to national figures.</span>
+    </footer>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/shared-constants.js"></script>
+  <script src="js/page2.js"></script>
+</body>
+</html>

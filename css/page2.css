@@ -1,0 +1,130 @@
+/*
+ * Page 2 layout: headline strip + 2×2 chart grid, fixed to one viewport.
+ * AI prompts used: build page 2 in the same one-screen / minmax(0) / SVG-in-box
+ * style as page 1, with shared year selector and cases / stay toggle.
+ */
+
+.p2-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+}
+
+.p2-intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 20px;
+  min-width: 0;
+  padding: 2px 2px 0;
+}
+
+.p2-intro h2 {
+  font-size: clamp(1.15rem, 1.9vw, 1.7rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #12203a;
+}
+
+.p2-intro .p2-sub {
+  margin-top: 4px;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+.p2-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.year-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: min(100%, 560px);
+}
+
+.year-rail button {
+  min-width: 40px;
+  padding: 5px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.year-rail button[aria-pressed="true"] {
+  border-color: var(--blue-dark);
+  background: var(--blue-dark);
+  color: #fff;
+}
+
+.year-rail button:focus-visible,
+.toggle button:focus-visible,
+.p2-grid [tabindex]:focus-visible {
+  outline: 3px solid rgba(51, 177, 240, 0.6);
+  outline-offset: 2px;
+}
+
+.p2-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+}
+
+.p2-grid .chart-card {
+  min-height: 0;
+  padding: 10px 14px 6px;
+}
+
+.p2-grid .svg-container {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.p2-grid .svg-container svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-insight {
+  margin-top: 2px;
+  color: #5d6b80;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.fit-shell .footer-bar a {
+  color: inherit;
+}
+
+@media (max-height: 720px) {
+  .p2-intro .p2-sub,
+  .chart-insight { display: none; }
+  .p2-grid { gap: 8px; }
+  .p2-grid .chart-card { padding: 8px 10px 4px; }
+}
+
+@media (max-width: 980px) {
+  .p2-intro { flex-direction: column; align-items: stretch; }
+  .p2-controls { justify-content: flex-start; }
+  .p2-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+}

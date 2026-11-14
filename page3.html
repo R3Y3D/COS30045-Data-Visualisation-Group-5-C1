@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>First Nations people | Road crash hospitalised injuries 2011–2021</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/page3.css">
+</head>
+<body>
+  <div class="fit-shell">
+
+    <header class="topbar">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/logo.png" alt="Dashboard logo">
+        <div class="brand-text">
+          <h1 class="brand-title">Road crash hospitalised injuries</h1>
+          <p class="brand-subtitle">Australia 2011–2021 &bull; COS30045 Group 5</p>
+        </div>
+      </div>
+      <nav class="tabbar" aria-label="Story pages">
+        <a class="tab" href="index.html">1 The national picture</a>
+        <a class="tab" href="page2.html">2 Who is hurt, and where</a>
+        <a class="tab is-active" href="page3.html" aria-current="page">3 First Nations</a>
+      </nav>
+    </header>
+
+    <main class="p3-main">
+      <div class="p3-intro">
+        <div>
+          <h2 id="headline">First Nations people</h2>
+          <p id="subline" class="p3-sub">
+            First Nations cases rose +90% (1,167 → 2,220) while Non-Indigenous rose +15%.
+            Indexing to 2011 = 100 puts both on one axis. Remoteness and road-user mixes differ sharply.
+          </p>
+        </div>
+        <div class="p3-controls">
+          <div id="yearRail" class="year-rail" role="group" aria-label="Select year for category charts"></div>
+          <div class="legend-inline" aria-hidden="true">
+            <span><span class="swatch" style="background:#b86509"></span>First Nations</span>
+            <span><span class="swatch" style="background:#0a63b8"></span>Non-Indigenous</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="p3-grid" aria-label="First Nations comparison charts">
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Trend (index 2011 = 100)</h2>
+              <p class="chart-subtitle">Both groups on one scale; annotate the 2020 rise</p>
+            </div>
+          </div>
+          <div id="trendChart" class="svg-container"></div>
+          <p class="chart-insight">First Nations +90%; Non-Indigenous +15%. In 2020 First Nations cases rose +23% while the national total fell.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Remoteness mix</h2>
+              <p class="chart-subtitle">100% stacked bars by Indigenous status</p>
+            </div>
+          </div>
+          <div id="remotenessChart" class="svg-container"></div>
+          <p class="chart-insight">25.9% of First Nations cases are in Remote areas vs 2.1% for Non-Indigenous.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Road user shares</h2>
+              <p class="chart-subtitle">Dumbbells — First Nations vs Non-Indigenous</p>
+            </div>
+          </div>
+          <div id="roadUserChart" class="svg-container"></div>
+          <p class="chart-insight">Pedestrians 12.1% vs 6.8%; pedal cyclists 11.1% vs 19.0%. Hatched = suppressed minimum.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h2 class="chart-title">Parallel coordinates</h2>
+              <p class="chart-subtitle">Profile across remoteness and road-user shares</p>
+            </div>
+          </div>
+          <div id="parallelChart" class="svg-container"></div>
+          <p class="chart-insight">First Nations lines sit higher on Remote and Pedestrian; Non-Indigenous higher on Major Cities and Pedal cyclist.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer-bar">
+      <span>Counts, not rates. First Nations and Non-Indigenous do not sum to the national total (status not stated for some people). The rise may partly reflect population growth and recording changes — not a measure of risk.</span>
+      <span>Source: BITRE First Nations hospitalised injury data, 2023. Totals from fn_year.csv only.</span>
+    </footer>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/shared-constants.js"></script>
+  <script src="js/page3.js"></script>
+</body>
+</html>
