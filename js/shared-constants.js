@@ -1,5 +1,5 @@
 // Shared state, constants, formatters, and tooltip utilities for the D3.js Dashboard
-// All data is sourced exclusively from Data/Cleaned_CSV_Files/
+// All active data is sourced exclusively from Data/Cleaned_CSV/.
 
 const appState = {
   year: "All",
@@ -8,15 +8,21 @@ const appState = {
   selectedRoadUser: "All",
   selectedRemoteness: "All",
   selectedSex: "All",
+  view: "overview",
+  fnStatus: "First Nations people",
 
-  // Datasets from Data/Cleaned_CSV_Files/
+  // Normalised rows from the current national, jurisdiction and First Nations exports.
   nationalAnnual: [],     // national_annual.csv
   stateAnnual: [],        // Temporal Trends & State Comparisons.csv
-  roadUserAnnual: [],     // road_user_summary.csv
-  remotenessAnnual: [],   // remoteness_yearly_trends.csv
-  ageGroupAnnual: [],     // age_group_summary.csv
-  genderAnnual: [],       // Gender_demographic_summary.csv
-  counterpartyAnnual: [], // Counterparty Analysis.csv
+  roadUserAnnual: [],
+  remotenessAnnual: [],
+  ageGroupAnnual: [],
+  genderAnnual: [],
+  counterpartyAnnual: [],
+  stateRoadUser: [],
+  stateAge: [],
+  stateGender: [],
+  stateCounterparty: [],
   fnAnnual: [],
   fnRoadUser: [],
   fnAge: [],
@@ -62,9 +68,9 @@ const COLORS = {
 
 const AGE_ORDER = ["0-7", "8-16", "17-25", "26-39", "40-64", "65-74", "75+"];
 
-const formatNumber = d3.format(",.0f");
-const formatDecimal = d3.format(",.2f");
-const formatPercent = d3.format("+.1f");
+const formatNumber = value => Number.isFinite(value) ? d3.format(",.0f")(value) : "—";
+const formatDecimal = value => Number.isFinite(value) ? d3.format(",.2f")(value) : "—";
+const formatPercent = value => Number.isFinite(value) ? d3.format("+.1f")(value) : "—";
 
 function getMetricLabel(metric = appState.metric) {
   return metric === "bed_days" ? "Bed Days" : "Hospitalisations";
@@ -103,4 +109,39 @@ function hideTooltip() {
 function filterByYear(rows) {
   if (appState.year === "All") return rows;
   return rows.filter(d => String(d.year) === String(appState.year));
+}
+
+function getBreakdownRows(kind, applyYear = true) {
+  const nationalKeys = { road_user: "roadUserAnnual", age_group: "ageGroupAnnual", sex: "genderAnnual", counterparty: "counterpartyAnnual" };
+  const stateKeys = { road_user: "stateRoadUser", age_group: "stateAge", sex: "stateGender", counterparty: "stateCounterparty" };
+  const selected = appState.selectedState !== "All";
+  return RoadData.filterRows(appState[(selected ? stateKeys : nationalKeys)[kind]], {
+    year: applyYear ? appState.year : "All", state: selected ? appState.selectedState : "All"
+  });
+}
+
+function getFnRows(key, applyYear = true) {
+  return RoadData.filterRows(appState[key], { year: applyYear ? appState.year : "All", status: appState.fnStatus });
+}
+
+function metricText(row, metric = appState.metric) {
+  const value = row[metric];
+  if (!Number.isFinite(value)) return "Suppressed / unavailable";
+  return formatNumber(value) + (row[metric + "_partial"] || row.suppressed ? "†" : "");
+}
+
+function shareText(value) { return Number.isFinite(value) ? `${value.toFixed(1)}%` : "—"; }
+
+function categoryScopeLabel() { return appState.selectedState === "All" ? "Australia" : appState.selectedState; }
+
+function suppressionNote(rows) {
+  const total = RoadData.summarise(rows);
+  return total.hospitalisations_partial || total.bed_days_partial
+    ? "† Published subtotal: some source values are withheld or missing. Shares and bed days per case are omitted where totals are incomplete."
+    : "Shares use the displayed source and period. Bed days per case = total bed days ÷ total cases.";
+}
+
+function setChartNote(containerId, message) {
+  const card = d3.select("#" + containerId).node()?.closest(".chart-card");
+  if (card) d3.select(card).selectAll(".chart-note").data([message]).join("p").attr("class", "chart-note").text(message);
 }
