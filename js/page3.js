@@ -1,13 +1,13 @@
 /*
  * Page 3 — First Nations people
  * Charts: indexed trend, 100% remoteness stacks, road-user dumbbells,
- * and a parallel-coordinates profile (lecture technique).
+ * and a streamgraph (complex W11-style chart) of FN cases by remoteness.
  * Blank cases → skip mark + "n.p." in tooltip. suppressed = "Yes" → hatched fill
  * and a minimum-count note. fn_year.csv is the only source for FN totals.
  *
  * AI prompts used: build page 3 in the same one-screen D3 style as pages 1–2,
- * with First Nations story panels, suppression hatching, and a parallel-
- * coordinates special visualisation.
+ * with First Nations story panels, suppression hatching, and a streamgraph
+ * as the complex visualisation.
  */
 (() => {
   "use strict";
@@ -74,7 +74,7 @@
       bindControls();
       renderAll();
       const ro = new ResizeObserver(drawCharts);
-      ["#trendChart", "#remotenessChart", "#roadUserChart", "#parallelChart"]
+      ["#trendChart", "#remotenessChart", "#roadUserChart", "#streamChart"]
         .forEach(sel => ro.observe(document.querySelector(sel)));
     })
     .catch(err => {
@@ -126,7 +126,7 @@
     drawTrend();
     drawRemoteness();
     drawRoadUser();
-    drawParallel();
+    drawStream();
   }
 
   // ---------- Helpers ----------
@@ -509,119 +509,128 @@
       .text("n.p.");
   }
 
-  // ---------- Chart 4: parallel coordinates (special viz) ----------
-  function drawParallel() {
-    const host = d3.select("#parallelChart");
+  // ---------- Chart 4: streamgraph (complex viz) — FN cases by remoteness ----------
+  function drawStream() {
+    const host = d3.select("#streamChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
     if (w < 80 || h < 80) return;
 
-    // Build one profile per status from the selected year scope
-    const remoteRows = aggregate(inYear(state.remoteness), ["status", "remoteness"]);
-    const roadRows = aggregate(inYear(state.roadUser), ["status", "road_user"]);
+    // First Nations only — stream of remoteness layers over the full year range
+    const fnRows = state.remoteness.filter(d => d.status === FN);
+    const years = state.years;
+    const series = REMOTE_ORDER.map(remoteness =>
+      years.map(year => {
+        const row = fnRows.find(r => r.year === year && r.remoteness === remoteness);
+        return {
+          year,
+          remoteness,
+          cases: row && Number.isFinite(row.cases) ? row.cases : 0,
+          published: row && Number.isFinite(row.cases)
+        };
+      })
+    );
 
-    function share(status, rows, key, value) {
-      const subset = rows.filter(r => r.status === status);
-      const total = d3.sum(subset.filter(r => Number.isFinite(r.cases)), r => r.cases);
-      if (!total) return null;
-      const row = subset.find(r => r[key] === value);
-      return row && Number.isFinite(row.cases) ? (row.cases / total) * 100 : null;
-    }
+    const stacked = d3.stack()
+      .keys(d3.range(REMOTE_ORDER.length))
+      .offset(d3.stackOffsetWiggle)
+      .order(d3.stackOrderInsideOut)
+      (years.map((year, yi) => {
+        const point = { year };
+        REMOTE_ORDER.forEach((name, ki) => { point[ki] = series[ki][yi].cases; });
+        return point;
+      }));
 
-    const dims = [
-      { key: "major", label: "Major Cities %", get: s => share(s, remoteRows, "remoteness", "Major Cities") },
-      { key: "regional", label: "Regional %", get: s => share(s, remoteRows, "remoteness", "Regional") },
-      { key: "remote", label: "Remote %", get: s => share(s, remoteRows, "remoteness", "Remote") },
-      { key: "ped", label: "Pedestrian %", get: s => share(s, roadRows, "road_user", "Pedestrian") },
-      { key: "cycle", label: "Pedal cyclist %", get: s => share(s, roadRows, "road_user", "Pedal cyclist") },
-      { key: "moto", label: "Motorcyclist %", get: s => share(s, roadRows, "road_user", "Motorcyclist") }
-    ];
-
-    const profiles = [FN, NI].map(status => {
-      const values = {};
-      dims.forEach(d => { values[d.key] = d.get(status); });
-      return { status, values };
-    });
-
-    const m = { top: 28, right: 18, bottom: 18, left: 18 };
+    const m = { top: 14, right: 12, bottom: 36, left: 40 };
     const iw = w - m.left - m.right;
     const ih = h - m.top - m.bottom;
     const svg = host.append("svg").attr("viewBox", `0 0 ${w} ${h}`)
       .attr("role", "img")
-      .attr("aria-label", "Parallel coordinates comparing First Nations and Non-Indigenous profiles across remoteness and road-user shares");
+      .attr("aria-label", "Streamgraph of First Nations hospitalisations by remoteness from 2011 to 2021");
     const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
 
-    const x = d3.scalePoint(dims.map(d => d.key), [0, iw]).padding(0.15);
-    const y = {};
-    dims.forEach(d => {
-      const vals = profiles.map(p => p.values[d.key]).filter(Number.isFinite);
-      const lo = 0;
-      const hi = Math.max(10, (d3.max(vals) || 10) * 1.15);
-      y[d.key] = d3.scaleLinear([lo, hi], [ih, 0]);
-    });
+    const x = d3.scalePoint(years, [0, iw]).padding(0.15);
+    const y = d3.scaleLinear()
+      .domain([
+        d3.min(stacked, layer => d3.min(layer, d => d[0])),
+        d3.max(stacked, layer => d3.max(layer, d => d[1]))
+      ])
+      .range([ih, 0]);
 
-    // Axes: tick numbers only on the first and last axes to keep the panel readable
-    dims.forEach((d, i) => {
-      const ax = g.append("g").attr("transform", `translate(${x(d.key)},0)`);
-      ax.append("line").attr("y1", 0).attr("y2", ih).attr("stroke", "#d5deea");
-      const showTicks = i === 0 || i === dims.length - 1;
-      ax.call(d3.axisLeft(y[d.key]).ticks(4).tickSize(showTicks ? 4 : 0).tickFormat(showTicks ? d => `${d}` : ""));
-      ax.selectAll("text").attr("font-size", "11px").attr("fill", "#5d6b80");
-      const short = d.label.replace(" %", "");
-      ax.append("text")
-        .attr("y", -14)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#334155")
-        .attr("font-size", "11px")
-        .attr("font-weight", "700")
-        .text(short);
-    });
+    const area = d3.area()
+      .x(d => x(d.data.year))
+      .y0(d => y(d[0]))
+      .y1(d => y(d[1]))
+      .curve(d3.curveBasis);
 
-    function path(profile) {
-      return d3.line()
-        .defined(d => Number.isFinite(profile.values[d.key]))
-        .x(d => x(d.key))
-        .y(d => y[d.key](profile.values[d.key]))(dims);
-    }
-
-    g.selectAll("path.profile").data(profiles).join("path")
-      .attr("class", "profile bar-interactive")
-      .attr("fill", "none")
-      .attr("stroke", d => STATUS_COLOR[d.status])
-      .attr("stroke-width", 2.6)
-      .attr("d", path)
+    g.selectAll("path.layer").data(stacked).join("path")
+      .attr("class", "layer bar-interactive")
+      .attr("fill", (d, i) => REMOTE_COLORS[REMOTE_ORDER[i]])
+      .attr("opacity", 0.92)
+      .attr("d", area)
       .attr("tabindex", 0)
       .attr("role", "img")
-      .attr("aria-label", d => `${d.status} parallel-coordinates profile`)
-      .on("mouseenter focus", (event, d) => {
-        const lines = dims.map(dim => {
-          const v = d.values[dim.key];
-          return `${dim.label}: <b>${Number.isFinite(v) ? `${formatDecimal(v)}%` : "n.p."}</b>`;
-        }).join("<br/>");
-        showTooltip(event.type === "focus" ? fakeEvent(event.target) : event,
-          `<strong>${d.status}</strong>${lines}`);
+      .attr("aria-label", (d, i) => `First Nations ${REMOTE_ORDER[i]} stream layer`)
+      .on("mouseenter focus", (event, layer) => {
+        const i = layer.index;
+        const name = REMOTE_ORDER[i];
+        const focusYear = state.year ?? years[years.length - 1];
+        const row = series[i].find(r => r.year === focusYear);
+        const tip = row && row.published
+          ? `<strong>${name}</strong>First Nations cases in ${focusYear}: <b>${formatNumber(row.cases)}</b><br/>Layer thickness = cases over time.`
+          : `<strong>${name}</strong>Cases: <b>n.p.</b>`;
+        showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
       .on("mouseleave blur", hideTooltip);
 
-    g.selectAll("g.dots").data(profiles).join("g")
-      .attr("fill", d => STATUS_COLOR[d.status])
-      .selectAll("circle")
-      .data(d => dims.map(dim => ({ status: d.status, dim, value: d.values[dim.key] })))
-      .join("circle")
-      .attr("class", "bar-interactive")
-      .attr("cx", d => x(d.dim.key))
-      .attr("cy", d => Number.isFinite(d.value) ? y[d.dim.key](d.value) : -999)
-      .attr("r", d => Number.isFinite(d.value) ? 4.5 : 0)
-      .style("display", d => (Number.isFinite(d.value) ? null : "none"))
-      .attr("tabindex", d => (Number.isFinite(d.value) ? 0 : null))
-      .attr("role", "img")
-      .attr("aria-label", d => `${d.status}, ${d.dim.label}: ${Number.isFinite(d.value) ? formatDecimal(d.value) + "%" : "n.p."}`)
-      .on("mouseenter focus", (event, d) => {
+    // Hover bands by year for precise tooltips
+    g.selectAll("rect.year-hit").data(years).join("rect")
+      .attr("class", "year-hit bar-interactive")
+      .attr("x", d => x(d) - x.step() / 2)
+      .attr("y", 0)
+      .attr("width", x.step())
+      .attr("height", ih)
+      .attr("fill", "transparent")
+      .attr("tabindex", 0)
+      .attr("role", "button")
+      .attr("aria-label", d => `Year ${d}. Select to filter category charts.`)
+      .on("mouseenter focus", (event, year) => {
+        const parts = REMOTE_ORDER.map((name, i) => {
+          const row = series[i].find(r => r.year === year);
+          return row && row.published
+            ? `${name}: <b>${formatNumber(row.cases)}</b>`
+            : `${name}: <b>n.p.</b>`;
+        }).join("<br/>");
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event,
-          `<strong>${d.status}</strong>${d.dim.label}: <b>${Number.isFinite(d.value) ? `${formatDecimal(d.value)}%` : "n.p."}</b>`);
+          `<strong>${year} · First Nations</strong>${parts}`);
       })
       .on("mousemove", moveTooltip)
-      .on("mouseleave blur", hideTooltip);
+      .on("mouseleave blur", hideTooltip)
+      .on("click", (event, year) => setYear(state.year === year ? null : year))
+      .on("keydown", (event, year) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setYear(state.year === year ? null : year);
+        }
+      });
+
+    if (state.year !== null && x(state.year) != null) {
+      g.append("line")
+        .attr("x1", x(state.year)).attr("x2", x(state.year))
+        .attr("y1", 0).attr("y2", ih)
+        .attr("stroke", COLORS.highlight).attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+    }
+
+    g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`)
+      .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+    // Legend
+    const leg = g.append("g").attr("transform", `translate(0,${ih + 22})`);
+    REMOTE_ORDER.forEach((name, i) => {
+      const item = leg.append("g").attr("transform", `translate(${i * 110},0)`);
+      item.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", REMOTE_COLORS[name]);
+      item.append("text").attr("x", 14).attr("y", 9).attr("fill", "#475569").attr("font-size", "11px").text(name);
+    });
   }
 })();

@@ -1,12 +1,12 @@
 /*
  * Page 2 — Who is hurt, and where
- * Four charts: road user, age×sex pyramid, states, remoteness.
+ * Four charts: road user, age×sex pyramid, state×year heatmap (complex), remoteness.
  * Shared interactions: year selection and Cases / bed-days-per-admission toggle;
- * click a state to highlight it. Blank cases are never drawn as 0.
+ * click a state row to highlight it. Blank cases are never drawn as 0.
  *
  * AI prompts used: build page 2 matching page 1’s one-screen D3 layout, with the
- * four-panel story, year selector, metric toggle, tooltips, and data rules for
- * null / n.p. values.
+ * four-panel story, year selector, metric toggle, tooltips, data rules for
+ * null / n.p. values, and a W11 heatmap as the complex chart.
  */
 (() => {
   "use strict";
@@ -395,74 +395,108 @@
       .call(d3.axisBottom(xFemale).ticks(3).tickFormat(d => useStay ? d3.format(".0f")(d) : d3.format("~s")(d)));
   }
 
-  // ---------- Chart 3: states ranked bars / small-multiples feel ----------
+  // ---------- Chart 3: complex heatmap (year × state) — W11 chart type ----------
   function drawStates() {
     const host = d3.select("#stateChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
     if (w < 80 || h < 80) return;
 
-    const rows = aggregate(inYear(state.stateYear), ["state_or_territory"], ["cases", "bed_days"])
-      .map(d => ({
+    // Heatmap always uses the full year×state grid; year chip highlights a column
+    const cells = state.stateYear.map(d => {
+      const cases = Number.isFinite(d.cases) ? d.cases : null;
+      const bed_days = Number.isFinite(d.bed_days) ? d.bed_days : null;
+      const stay = (cases && bed_days != null) ? bed_days / cases : null;
+      return {
         state: d.state_or_territory,
-        cases: d.cases,
-        bed_days: d.bed_days,
-        bed_days_per_case: d.bed_days_per_case,
-        value: valueFor(d)
-      }))
-      .sort((a, b) => (Number.isFinite(b.value) ? b.value : -1) - (Number.isFinite(a.value) ? a.value : -1));
+        year: d.year,
+        cases,
+        bed_days,
+        bed_days_per_case: stay,
+        value: state.metric === "stay" ? stay : cases
+      };
+    });
 
-    const m = { top: 10, right: 14, bottom: 28, left: 40 };
+    const years = state.years;
+    const stateOrder = [...new Set(cells.map(d => d.state))]
+      .map(name => ({
+        state: name,
+        total: d3.sum(cells.filter(c => c.state === name && Number.isFinite(c.cases)), c => c.cases)
+      }))
+      .sort((a, b) => b.total - a.total)
+      .map(d => d.state);
+
+    const m = { top: 18, right: 52, bottom: 22, left: 36 };
     const iw = w - m.left - m.right;
     const ih = h - m.top - m.bottom;
 
     const svg = host.append("svg").attr("viewBox", `0 0 ${w} ${h}`)
       .attr("role", "img")
-      .attr("aria-label", `Bar chart of ${metricLabel().toLowerCase()} by state and territory. Click a bar to highlight.`);
+      .attr("aria-label", `Heatmap of ${metricLabel().toLowerCase()} by state and year. Click a row to highlight a state.`);
     const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
 
-    // Series-break note
     g.append("text")
-      .attr("x", iw).attr("y", 2).attr("text-anchor", "end")
+      .attr("x", iw).attr("y", -6).attr("text-anchor", "end")
       .attr("fill", "#b45309").attr("font-size", "10px").attr("font-weight", "600")
       .text("Breaks: Vic from 2012 · NSW from Jun 2017");
 
-    const x = d3.scaleBand(rows.map(d => d.state), [0, iw]).padding(0.28);
-    const yMax = d3.max(rows, d => d.value) || 1;
-    const y = d3.scaleLinear([0, yMax * 1.12], [ih, 0]).nice();
+    const x = d3.scaleBand(years, [0, iw]).paddingInner(0.06).paddingOuter(0.02);
+    const y = d3.scaleBand(stateOrder, [0, ih]).paddingInner(0.08).paddingOuter(0.02);
+    const vals = cells.map(d => d.value).filter(Number.isFinite);
+    const color = d3.scaleSequential(d3.interpolateBlues)
+      .domain([0, d3.max(vals) || 1]);
 
-    g.append("g").attr("class", "grid").call(d3.axisLeft(y).ticks(4).tickSize(-iw).tickFormat(""));
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`)
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x).tickFormat(d3.format("d")));
     g.append("g").attr("class", "axis")
-      .call(d3.axisLeft(y).ticks(4).tickFormat(d => state.metric === "stay" ? d3.format(".1f")(d) : d3.format("~s")(d)));
+      .call(d3.axisLeft(y).tickSize(0).tickPadding(6));
 
-    g.selectAll("rect.bar").data(rows).join("rect")
-      .attr("class", "bar bar-interactive")
-      .attr("x", d => x(d.state))
-      .attr("y", d => Number.isFinite(d.value) ? y(d.value) : ih)
+    g.selectAll("rect.cell").data(cells).join("rect")
+      .attr("class", "cell bar-interactive")
+      .attr("x", d => x(d.year))
+      .attr("y", d => y(d.state))
       .attr("width", x.bandwidth())
-      .attr("height", d => Number.isFinite(d.value) ? ih - y(d.value) : 0)
-      .attr("rx", 3)
-      .attr("fill", d => {
-        if (!Number.isFinite(d.value)) return COLORS.slate;
-        if (state.selectedState && state.selectedState !== d.state) return COLORS.sky;
-        return COLORS.statePalette[d.state] || COLORS.primary;
+      .attr("height", y.bandwidth())
+      .attr("rx", 2)
+      .attr("fill", d => Number.isFinite(d.value) ? color(d.value) : "#e2e8f0")
+      .attr("opacity", d => {
+        if (state.selectedState && state.selectedState !== d.state) return 0.25;
+        if (state.year !== null && state.year !== d.year) return 0.35;
+        return 1;
       })
-      .attr("opacity", d => (state.selectedState && state.selectedState !== d.state ? 0.35 : 1))
+      .attr("stroke", d => (state.selectedState === d.state ? COLORS.highlight : "transparent"))
+      .attr("stroke-width", d => (state.selectedState === d.state ? 1.5 : 0))
       .attr("tabindex", 0)
       .attr("role", "button")
-      .attr("aria-label", d => `${d.state}: ${formatMetric(d.value)}. Activate to highlight.`)
+      .attr("aria-label", d => Number.isFinite(d.value)
+        ? `${d.state}, ${d.year}: ${formatMetric(d.value)}. Activate to highlight ${d.state}.`
+        : `${d.state}, ${d.year}: not published`)
       .on("mouseenter focus", (event, d) => {
         const tip = Number.isFinite(d.cases)
-          ? `<strong>${d.state}</strong>Cases: <b>${formatNumber(d.cases)}</b><br/>Bed days: <b>${formatNumber(d.bed_days)}</b><br/>Stay: <b>${formatDecimal(d.bed_days_per_case)} days</b><br/>Click to ${state.selectedState === d.state ? "clear" : "highlight"}.`
-          : `<strong>${d.state}</strong>Cases: <b>n.p.</b>`;
+          ? `<strong>${d.state} · ${d.year}</strong>Cases: <b>${formatNumber(d.cases)}</b><br/>Stay: <b>${formatDecimal(d.bed_days_per_case)} days</b><br/>Click row to ${state.selectedState === d.state ? "clear" : "highlight"}.`
+          : `<strong>${d.state} · ${d.year}</strong>Cases: <b>n.p.</b>`;
         showTooltip(event.type === "focus" ? fakeEvent(event.target) : event, tip);
       })
       .on("mousemove", moveTooltip)
       .on("mouseleave blur", hideTooltip)
       .on("click", (event, d) => selectState(d.state))
       .on("keydown", onKeyState);
+
+    // Colour legend
+    const legendH = Math.max(40, ih * 0.55);
+    const legend = g.append("g").attr("transform", `translate(${iw + 12}, ${(ih - legendH) / 2})`);
+    const lgY = d3.scaleLinear().domain(color.domain()).range([legendH, 0]);
+    const lgTicks = lgY.ticks(4);
+    for (let i = 0; i < 40; i++) {
+      const t0 = i / 40, t1 = (i + 1) / 40;
+      const v0 = color.domain()[0] + (color.domain()[1] - color.domain()[0]) * (1 - t1);
+      legend.append("rect")
+        .attr("y", legendH * t0).attr("width", 10).attr("height", legendH / 40 + 0.5)
+        .attr("fill", color(v0));
+    }
+    legend.append("g").attr("class", "axis").attr("transform", "translate(10,0)")
+      .call(d3.axisRight(lgY).tickValues(lgTicks)
+        .tickFormat(d => state.metric === "stay" ? d3.format(".1f")(d) : d3.format("~s")(d)));
   }
 
   // ---------- Chart 4: remoteness bed days per case ----------
