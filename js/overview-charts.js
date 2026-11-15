@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const DATA_URL = "Data\\Cleaned_CSV\\hospitilisation\\national_annual.csv";
+  const DATA_URL = "Data/Cleaned_CSV/hospitilisation/national_annual.csv";
   const state = { rows: [], metric: "cases", year: null };
   const entrance = createEntranceController(1200);
   const pct = d3.format("+.1f");
