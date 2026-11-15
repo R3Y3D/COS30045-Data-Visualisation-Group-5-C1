@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  // Data and page state
   const DATA_URL = "Data/Cleaned_CSV/hospitilisation/national_annual.csv";
   const state = { rows: [], metric: "cases", year: null };
   const entrance = createEntranceController(1200);
@@ -9,7 +8,6 @@
   const metricName = m => (m === "bed_days" ? "Bed days" : "Hospitalisations");
   const set = (sel, text) => d3.select(sel).text(text);
 
-  // Load data and initialize page controls
   d3.csv(DATA_URL, d3.autoType)
     .then(rows => {
       state.rows = rows.filter(d => Number.isFinite(d.year)).sort((a, b) => a.year - b.year);
@@ -32,7 +30,6 @@
       set("#headline", "Data not available");
     });
 
-  // Metric and year selection
   function bindControls() {
     d3.select("#btnCases").on("click", () => setMetric("cases"));
     d3.select("#btnBeds").on("click", () => setMetric("bed_days"));
@@ -54,7 +51,6 @@
     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectYear(d.year); }
   };
 
-  // Update headline and KPI text
   function renderText() {
     const rs = state.rows, first = rs[0], last = rs[rs.length - 1], key = state.metric;
     const scope = state.year === null ? rs : rs.filter(d => d.year === state.year);
@@ -84,7 +80,6 @@
     }
   }
 
-  // Redraw both charts when state or layout changes
   const renderAll = () => { renderText(); drawCharts(); };
   function drawCharts() {
     const animate = entrance.beginDraw(["#trendChart", "#stayChart"]);
@@ -97,7 +92,6 @@
     return { w: Math.floor(r.width), h: Math.floor(r.height) };
   };
 
-  // Annual hospitalisations or bed days bar chart
   function drawTrend(animate = false) {
     const host = d3.select("#trendChart");
     const { w, h } = boxSize(host);
@@ -164,13 +158,11 @@
     }
   }
 
-  // Position keyboard tooltips like pointer tooltips
   function fakeEvent(el) {
     const r = el.getBoundingClientRect();
     return { clientX: r.right, clientY: r.top };
   }
 
-  // Average bed days per admission line chart
   function drawStay(animate = false) {
     const host = d3.select("#stayChart");
     const { w, h } = boxSize(host);
