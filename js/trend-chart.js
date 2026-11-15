@@ -1,6 +1,3 @@
-// Chart 1: National Annual Trajectory (2011–2021) — bar style like the reference dashboard
-// Source: Data/Cleaned_CSV/hospitilisation/national_annual.csv
-
 function drawTrendChart() {
   const container = d3.select("#trendChart");
   container.selectAll("*").remove();
@@ -54,7 +51,6 @@ function drawTrendChart() {
     .attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => d >= 1000 ? d3.format("~s")(d) : d));
 
-  // Values and highlights come from the current national series.
   const mid = year => x(year) + x.bandwidth() / 2;
 
   g.selectAll(".trend-bar")
@@ -89,7 +85,6 @@ function drawTrendChart() {
       updateDashboard();
     });
 
-  // Value labels on 2011, 2019, 2020, 2021
   const labelYears = new Set(width < 450 ? [2011, 2021] : [2011, 2019, 2020, 2021]);
   g.selectAll(".val-lbl")
     .data(series.filter(d => labelYears.has(d.year)))

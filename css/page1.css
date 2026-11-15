@@ -1,9 +1,3 @@
-/*
- * Page 1 layout: story column + two stacked charts, one viewport tall.
- * AI prompts used: none for this file (styles moved from styles.css for the
- * shared fit-shell pattern used by pages 2 and 3).
- */
-
 .p1-main {
   display: grid;
   grid-template-columns: minmax(250px, 27%) minmax(0, 1fr);

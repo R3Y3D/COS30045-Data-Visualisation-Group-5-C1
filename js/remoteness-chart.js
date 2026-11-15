@@ -1,6 +1,3 @@
-// Chart 4: ABS Remoteness Area Trends (Major Cities, Regional, Remote)
-// Source: Data/Cleaned_CSV/hospitilisation/national_remoteness.csv
-
 function drawRemotenessChart() {
   const container = d3.select("#remotenessChart");
   container.selectAll("*").remove();
@@ -35,7 +32,6 @@ function drawRemotenessChart() {
     return { category: cat, values, total };
   });
 
-  // Keep Missing in the denominator, consistent with the regional breakdown table.
   const grandTotal = d3.sum(filterByYear(appState.remotenessAnnual), d => d[appState.metric]) || 1;
 
   const width = chartWidth(container, 640);
@@ -76,7 +72,6 @@ function drawRemotenessChart() {
     .attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => d >= 1000 ? d3.format("~s")(d) : d));
 
-  // Highlight selected year vertical guide if active
   if (appState.year !== "All" && x(+appState.year) !== undefined) {
     g.append("line")
       .attr("x1", x(+appState.year)).attr("x2", x(+appState.year))

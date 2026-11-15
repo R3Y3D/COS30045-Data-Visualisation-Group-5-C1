@@ -1,4 +1,3 @@
-// Sortable tables use current source totals and retain suppression metadata.
 const tableSortState = {};
 const HEAT = { blue: ["#eef8fe", "#86cdf5"], green: ["#ecf8f1", "#8fd9ae"], purple: ["#f1ecf9", "#a98fd3"] };
 function drawTable(id, cfg) {

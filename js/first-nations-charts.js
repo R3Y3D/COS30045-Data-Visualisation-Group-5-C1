@@ -1,4 +1,3 @@
-// First Nations long-format exports from Data/Cleaned_CSV/first_nation/.
 function drawFnCharts() {
   drawFnAnnualChart();
   const scope = appState.fnStatus;

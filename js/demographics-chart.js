@@ -1,4 +1,3 @@
-// Sources: Cleaned_CSV/hospitilisation/national_age_gender.csv and state_territory/state_age.csv / state_gender.csv.
 function drawDemographicsChart() {
   drawVerticalCategories("demographicsChart", getBreakdownRows("age_group"), "age_group", { title: "Age groups" });
   const rows = RoadData.categoryRows(getBreakdownRows("sex"), "sex", appState.metric);

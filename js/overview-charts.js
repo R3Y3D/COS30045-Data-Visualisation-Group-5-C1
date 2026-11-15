@@ -2,13 +2,12 @@
   "use strict";
 
   const DATA_URL = "Data\\Cleaned_CSV\\hospitilisation\\national_annual.csv";
-  const state = { rows: [], metric: "cases", year: null }; // year === null means "all years"
+  const state = { rows: [], metric: "cases", year: null };
   const entrance = createEntranceController(1200);
   const pct = d3.format("+.1f");
   const metricName = m => (m === "bed_days" ? "Bed days" : "Hospitalisations");
   const set = (sel, text) => d3.select(sel).text(text);
 
-  // ---------- Data loading ----------
   d3.csv(DATA_URL, d3.autoType)
     .then(rows => {
       state.rows = rows.filter(d => Number.isFinite(d.year)).sort((a, b) => a.year - b.year);
@@ -17,7 +16,7 @@
       initThemeToggle();
       initChartExpand();
       renderAll();
-      // Redraw the charts when their boxes change size (window resize / expand)
+
       const ro = new ResizeObserver(() => {
         if (entrance.shouldSkipResize()) return;
         drawCharts();
@@ -31,7 +30,6 @@
       set("#headline", "Data not available");
     });
 
-  // ---------- Interaction ----------
   function bindControls() {
     d3.select("#btnCases").on("click", () => setMetric("cases"));
     d3.select("#btnBeds").on("click", () => setMetric("bed_days"));
@@ -45,16 +43,14 @@
   }
 
   function selectYear(year) {
-    state.year = state.year === year ? null : year; // same year again clears the selection
+    state.year = state.year === year ? null : year;
     renderAll();
   }
 
-  // Keyboard support: Enter or Space selects the focused mark
   const onKey = (event, d) => {
     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectYear(d.year); }
   };
 
-  // ---------- Text and KPIs ----------
   function renderText() {
     const rs = state.rows, first = rs[0], last = rs[rs.length - 1], key = state.metric;
     const scope = state.year === null ? rs : rs.filter(d => d.year === state.year);
@@ -96,7 +92,6 @@
     return { w: Math.floor(r.width), h: Math.floor(r.height) };
   };
 
-  // ---------- Chart 1: bars per year, with the 2020 dip annotated ----------
   function drawTrend(animate = false) {
     const host = d3.select("#trendChart");
     const { w, h } = boxSize(host);
@@ -118,7 +113,6 @@
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
     g.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(4).tickFormat(d => d3.format("~s")(d)));
 
-    // Annotation: change from 2019 to 2020 (computed from the data, not typed in)
     const a = rows.find(d => d.year === 2019), b = rows.find(d => d.year === 2020);
     if (a && b) {
       const cx = x(2020) + x.bandwidth() / 2;
@@ -164,13 +158,11 @@
     }
   }
 
-  // Position the tooltip next to a keyboard-focused element
   function fakeEvent(el) {
     const r = el.getBoundingClientRect();
     return { clientX: r.right, clientY: r.top };
   }
 
-  // ---------- Chart 2: bed days per admission, with the 2014-2016 jump marked ----------
   function drawStay(animate = false) {
     const host = d3.select("#stayChart");
     const { w, h } = boxSize(host);
@@ -193,7 +185,6 @@
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x).tickFormat(d3.format("d")));
     g.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(3));
 
-    // Shaded band over the abrupt rise (values read from the data)
     const p = rows.find(d => d.year === 2014), q = rows.find(d => d.year === 2016);
     if (p && q) {
       g.append("rect").attr("x", x(2014)).attr("width", x(2016) - x(2014)).attr("y", 0).attr("height", ih)

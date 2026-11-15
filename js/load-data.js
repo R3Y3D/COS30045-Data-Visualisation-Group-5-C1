@@ -1,4 +1,3 @@
-// Load only the current exports. No historical snapshot or fallback is used.
 const CSV_DIR = "Data/Cleaned_CSV/";
 const DATA_FILES = [
   ["nationalAnnual", "hospitilisation/national_annual.csv", []],

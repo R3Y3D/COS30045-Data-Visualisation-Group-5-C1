@@ -1,6 +1,3 @@
-// Chart 2: State & Territory Comparison (NSW, Vic, Qld, WA, SA, Tas, NT, ACT)
-// Source: Data/Cleaned_CSV/state_territory/state_year.csv
-
 function drawStateChart() {
   setChartNote("stateChart", "Jurisdiction cases and bed days exclude deaths in hospital within 30 days. National and jurisdiction totals use different source coverage.");
   const container = d3.select("#stateChart");

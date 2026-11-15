@@ -79,7 +79,6 @@ button, select { font: inherit; }
   gap: 18px;
 }
 
-/* ---------- Header: brand + curved tab bar ---------- */
 .topbar {
   display: flex;
   align-items: stretch;
@@ -166,7 +165,6 @@ button, select { font: inherit; }
 .btn-reset:hover { background: #eef5ff; }
 .btn-reset:active { transform: translateY(1px); }
 
-/* ---------- Filters ---------- */
 .controls-bar { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
 .control-item { display: flex; flex-direction: column; gap: 5px; }
 
@@ -199,7 +197,6 @@ button, select { font: inherit; }
   outline-offset: 2px;
 }
 
-/* ---------- KPI gradient cards ---------- */
 .kpi-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 14px; }
 
 .kpi-card {
@@ -227,7 +224,6 @@ button, select { font: inherit; }
 .kpi-6 { background: linear-gradient(135deg, #7b3fb3, #8f58c4); }
 .kpi-7 { background: linear-gradient(135deg, #5b3ec3, #4a62d6); }
 
-/* ---------- Chart cards ---------- */
 .charts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 
 .chart-card {
@@ -269,7 +265,6 @@ button, select { font: inherit; }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .legend-swatch { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
 
-/* ---------- D3 axes, grid, tooltip ---------- */
 .axis path, .axis line { stroke: var(--axis-stroke); }
 .axis text { fill: var(--axis-text); font-size: 11px; font-family: inherit; }
 .grid line { stroke: var(--grid-stroke); stroke-dasharray: 1.5, 3; }
@@ -305,7 +300,6 @@ button, select { font: inherit; }
   line-height: 1.5;
 }
 
-/* ---------- Responsive ---------- */
 @media (max-width: 1400px) {
   .kpi-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
@@ -331,7 +325,6 @@ button, select { font: inherit; }
   .chart-header { flex-direction: column; }
 }
 
-/* Subtle UI motion (disabled when prefers-reduced-motion) */
 .tab { transition: background 160ms ease, transform 160ms ease; }
 .tab:hover { transform: translateY(-1px); }
 .btn-next { transition: background 160ms ease, transform 160ms ease; }
@@ -368,7 +361,6 @@ button, select { font: inherit; }
   .tab:hover, .btn-next:hover, .year-rail button:hover, .toggle button:hover { transform: none; }
 }
 
-/* ---------- Views (tabs) & expandable charts ---------- */
 .chart-card.is-hidden { display: none; }
 .charts-grid .chart-card.is-solo { grid-column: 1 / -1; min-height: 520px; }
 
@@ -445,7 +437,6 @@ body.no-scroll { overflow: hidden; }
   .responsive-chart svg { height: auto; }
 }
 
-/* ---------- Heat-map tables ---------- */
 .charts-grid .chart-card.is-wide { grid-column: 1 / -1; min-height: 380px; }
 
 .table-container { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
@@ -478,7 +469,6 @@ body.no-scroll { overflow: hidden; }
 .heat-table tbody tr.is-active td.col-text { font-weight: 700; color: var(--blue); box-shadow: inset 3px 0 0 var(--highlight, #e0557a); }
 .heat-table tbody tr.is-active td { font-weight: 700; }
 
-/* Shown inside a card when its chart/table fails to draw */
 .chart-error {
   margin: 12px 0;
   padding: 12px 14px;
@@ -490,10 +480,8 @@ body.no-scroll { overflow: hidden; }
   line-height: 1.5;
 }
 
-
 html, body { height: 100%; overflow: hidden; }
 
-/* The whole page is exactly one viewport tall, so nothing scrolls */
 .fit-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -506,7 +494,6 @@ html, body { height: 100%; overflow: hidden; }
 .fit-shell .topbar { margin-bottom: 0; }
 .fit-shell .brand-logo { height: 52px; }
 
-/* Page-1 layout lives in css/page1.css; pages 2–3 have their own layout sheets. */
 .toggle { display: inline-flex; flex-shrink: 0; border: 1px solid var(--border-color); border-radius: 999px; overflow: hidden; }
 .toggle button { padding: 6px 14px; border: 0; background: var(--control-bg); color: var(--control-text); font-size: 0.78rem; font-weight: 600; cursor: pointer; }
 .toggle button[aria-pressed="true"] { background: var(--blue-dark); color: #fff; }
@@ -520,7 +507,6 @@ html[data-theme="dark"] .chart-error {
   color: #f3a7bc;
 }
 
-/* Hard dark-mode text contrast (beats stale/hardcoded light-theme colors) */
 html[data-theme="dark"] .brand-title,
 html[data-theme="dark"] .p1-story h2,
 html[data-theme="dark"] .p2-intro h2,

@@ -1,4 +1,3 @@
-// Shared, dependency-free transformations for the current Cleaned_CSV exports.
 (function (root) {
   "use strict";
 

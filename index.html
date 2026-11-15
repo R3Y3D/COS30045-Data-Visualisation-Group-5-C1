@@ -11,7 +11,7 @@
         if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
           document.documentElement.setAttribute("data-theme", "dark");
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) {}
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,7 +43,6 @@
     </header>
 
     <main class="p1-main">
-      <!-- Story panel: the headline changes with the selected year -->
       <aside class="p1-story" aria-live="polite">
         <h2 id="headline">Loading…</h2>
         <p id="subline" class="p1-sub"></p>

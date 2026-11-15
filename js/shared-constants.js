@@ -1,9 +1,6 @@
-// Shared state, constants, formatters, and tooltip utilities for the D3.js Dashboard
-// All active data is sourced exclusively from Data/Cleaned_CSV/.
-
 const appState = {
   year: "All",
-  metric: "hospitalisations", // "hospitalisations" or "bed_days"
+  metric: "hospitalisations",
   selectedState: "All",
   selectedRoadUser: "All",
   selectedRemoteness: "All",
@@ -11,9 +8,8 @@ const appState = {
   view: "overview",
   fnStatus: "First Nations people",
 
-  // Normalised rows from the current national, jurisdiction and First Nations exports.
-  nationalAnnual: [],     // national_annual.csv
-  stateAnnual: [],        // state_territory/state_year.csv
+  nationalAnnual: [],
+  stateAnnual: [],
   roadUserAnnual: [],
   remotenessAnnual: [],
   ageGroupAnnual: [],
@@ -30,7 +26,6 @@ const appState = {
   fnCounterparty: []
 };
 
-// Palette taken from the reference dashboard (navy / sky blue / teal / purple / pink)
 const COLORS = {
   primary: "#0a63b8",
   sky: "#33b1f0",
@@ -150,7 +145,6 @@ function chartWidth(host, preferred = 640) {
   return Math.max(320, Math.min(preferred, host.node()?.getBoundingClientRect().width || preferred));
 }
 
-/** Motion helpers — duration is 0 when the user prefers reduced motion. */
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -161,13 +155,6 @@ function chartDelay(ms = 18) {
   return prefersReducedMotion() ? 0 : ms;
 }
 
-/**
- * One-shot page-load entrance controller.
- * First draw returns animate=true; ResizeObserver is ignored briefly so it
- * does not wipe the entrance mid-transition.
- * Pass chart host selectors (or elements) so a too-small first layout does
- * not consume the entrance before charts can actually draw.
- */
 function createEntranceController(holdMs = 1100) {
   let pending = true;
   let ignoreResizeUntil = 0;
@@ -199,7 +186,6 @@ function createEntranceController(holdMs = 1100) {
   };
 }
 
-/** Duration/delay helpers that honour an explicit animate flag. */
 function animDuration(animate, ms = 520) {
   return animate ? chartDuration(ms) : 0;
 }
@@ -207,7 +193,6 @@ function animDelay(animate, ms = 18) {
   return animate ? chartDelay(ms) : 0;
 }
 
-// ---------- Light / dark theme ----------
 const THEME_KEY = "cos30045-theme";
 
 function isDarkTheme() {
@@ -228,7 +213,7 @@ function getPreferredTheme() {
   try {
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === "light" || saved === "dark") return saved;
-  } catch (_) { /* ignore */ }
+  } catch (_) {}
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
@@ -236,7 +221,7 @@ function applyTheme(theme) {
   const next = theme === "dark" ? "dark" : "light";
   if (next === "dark") document.documentElement.setAttribute("data-theme", "dark");
   else document.documentElement.removeAttribute("data-theme");
-  try { localStorage.setItem(THEME_KEY, next); } catch (_) { /* ignore */ }
+  try { localStorage.setItem(THEME_KEY, next); } catch (_) {}
 
   const btn = document.getElementById("themeToggle");
   if (btn) {
@@ -257,7 +242,6 @@ function initThemeToggle() {
   btn.addEventListener("click", () => applyTheme(isDarkTheme() ? "light" : "dark"));
 }
 
-// ---------- Chart expand / zoom (restored from earlier dashboard) ----------
 let chartExpandBackdrop = null;
 
 function closeExpandedChart() {
@@ -285,7 +269,6 @@ function toggleExpandedChart(card) {
   document.body.classList.add("no-scroll");
 }
 
-/** Add an expand button to every .chart-card header (Escape / backdrop close). */
 function initChartExpand() {
   if (!chartExpandBackdrop) {
     chartExpandBackdrop = d3.select("body")
@@ -305,7 +288,6 @@ function initChartExpand() {
     let actions = header.select(".chart-actions");
     if (actions.empty()) {
       actions = header.append("div").attr("class", "chart-actions");
-      // Keep existing controls (metric toggle) next to the expand button
       Array.from(header.node().children).forEach(child => {
         if (child.classList && child.classList.contains("toggle")) {
           actions.node().appendChild(child);

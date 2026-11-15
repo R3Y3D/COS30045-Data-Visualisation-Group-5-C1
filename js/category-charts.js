@@ -1,4 +1,3 @@
-// Category charts share suppression-aware aggregation with the breakdown tables.
 const SHORT_LABELS = {
   "Car driver, passenger or unknown position": "Car occupants",
   "Heavy transport driver, passenger or unknown position": "Heavy transport occupants",

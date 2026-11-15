@@ -1,18 +1,6 @@
-/*
- * Page 3 — First Nations people
- * Charts: indexed trend, 100% remoteness stacks, road-user dumbbells,
- * and a streamgraph (complex W11-style chart) of FN cases by remoteness.
- * Blank cases → skip mark + "n.p." in tooltip. suppressed = "Yes" → hatched fill
- * and a minimum-count note. fn_year.csv is the only source for FN totals.
- *
- * AI prompts used: build page 3 in the same one-screen D3 style as pages 1–2,
- * with First Nations story panels, suppression hatching, and a streamgraph
- * as the complex visualisation.
- */
 (() => {
   "use strict";
 
-  // ---------- Data loading ----------
   const URLS = {
     year: "Data/Cleaned_CSV/first_nation/fn_year.csv",
     remoteness: "Data/Cleaned_CSV/first_nation/fn_remoteness.csv",
@@ -45,7 +33,7 @@
     remoteness: [],
     roadUser: [],
     years: [],
-    year: null // null = all years (category charts); trend always shows full series
+    year: null
   };
   const entrance = createEntranceController(1400);
   let animateNow = false;
@@ -93,7 +81,6 @@
       d3.select("#headline").text("Data not available");
     });
 
-  // ---------- Interaction ----------
   function bindControls() {
     const rail = d3.select("#yearRail");
     rail.append("button")
@@ -141,7 +128,6 @@
     animateNow = false;
   }
 
-  // ---------- Helpers ----------
   function isSuppressed(row) {
     return String(row.suppressed).toLowerCase() === "yes" || (Number.isFinite(row.n_suppressed) && row.n_suppressed > 0);
   }
@@ -160,7 +146,6 @@
     return state.year === null ? rows : rows.filter(d => d.year === state.year);
   }
 
-  /** Sum cases/bed_days; keep null if every source cell was blank. Track suppression. */
   function aggregate(rows, keyFields) {
     const map = new Map();
     for (const row of rows) {
@@ -217,7 +202,6 @@
     return `<strong>${label}</strong>Cases: <b>${formatNumber(row.cases)}${row.suppressed ? "†" : ""}</b><br/>Bed days: <b>${formatNumber(row.bed_days)}</b>${note}`;
   }
 
-  // ---------- Chart 1: indexed trend ----------
   function drawTrend() {
     const host = d3.select("#trendChart");
     const { w, h } = boxSize(host);
@@ -263,7 +247,6 @@
       .call(d3.axisBottom(x).tickFormat(d3.format("d")));
     g.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5));
 
-    // 2020 annotation from First Nations series
     const fnVals = series.find(s => s.status === FN)?.values || [];
     const a = fnVals.find(d => d.year === 2019);
     const b = fnVals.find(d => d.year === 2020);
@@ -277,7 +260,6 @@
         .text(`2020 FN: ${formatPercent(rise)}% vs 2019 (national total fell)`);
     }
 
-    // Baseline 100
     g.append("line").attr("x1", 0).attr("x2", iw).attr("y1", y(100)).attr("y2", y(100))
       .attr("stroke", themeMuted()).attr("stroke-dasharray", "4,3");
     g.append("text").attr("x", 2).attr("y", y(100) - 4)
@@ -327,7 +309,6 @@
     }
   }
 
-  // ---------- Chart 2: 100% stacked remoteness ----------
   function drawRemoteness() {
     const host = d3.select("#remotenessChart");
     const { w, h } = boxSize(host);
@@ -398,7 +379,6 @@
           .attr("height", d => Math.max(0, y(d.y0) - y(d.y1)));
       }
 
-      // Label Remote share (story focus) when tall enough
       const remote = group.find(d => d.remoteness === "Remote");
       if (remote && remote.share >= 4) {
         const label = g.append("text")
@@ -417,7 +397,6 @@
       }
     }
 
-    // Mini legend
     const leg = g.append("g").attr("transform", `translate(0,${ih + 22})`);
     REMOTE_ORDER.forEach((name, i) => {
       const item = leg.append("g").attr("transform", `translate(${i * 110},0)`);
@@ -426,7 +405,6 @@
     });
   }
 
-  // ---------- Chart 3: road-user dumbbells ----------
   function drawRoadUser() {
     const host = d3.select("#roadUserChart");
     const { w, h } = boxSize(host);
@@ -436,7 +414,6 @@
     const rows = aggregate(inYear(state.roadUser), ["status", "road_user"]);
     const users = [...new Set(rows.map(d => d.road_user))];
 
-    // Shares within each status (published cases only in denominator)
     const totals = {};
     for (const status of [FN, NI]) {
       totals[status] = d3.sum(rows.filter(r => r.status === status && Number.isFinite(r.cases)), r => r.cases) || 1;
@@ -477,7 +454,6 @@
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`)
       .call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}%`));
 
-    // Connector
     const conns = g.selectAll("line.conn").data(data.filter(d => Number.isFinite(d.fnShare) && Number.isFinite(d.niShare))).join("line")
       .attr("class", "conn")
       .attr("x1", d => x(d.fnShare))
@@ -529,7 +505,6 @@
           .attr("r", d => Number.isFinite(d[shareKey]) ? 5.5 : 0);
       }
 
-      // Hatch overlay for suppressed published values
       const hatch = g.selectAll(`circle.hatch-${key}`).data(data.filter(d => d[key].suppressed && Number.isFinite(d[shareKey]))).join("circle")
         .attr("cx", d => x(d[shareKey]))
         .attr("cy", d => y(d.label) + y.bandwidth() / 2)
@@ -545,7 +520,6 @@
     drawDots("fn", "fnShare", STATUS_COLOR[FN]);
     drawDots("ni", "niShare", STATUS_COLOR[NI]);
 
-    // n.p. labels where both missing or one missing
     g.selectAll("text.np").data(data.filter(d => !Number.isFinite(d.fnShare) && !Number.isFinite(d.niShare))).join("text")
       .attr("x", 4)
       .attr("y", d => y(d.label) + y.bandwidth() / 2)
@@ -555,14 +529,12 @@
       .text("n.p.");
   }
 
-  // ---------- Chart 4: streamgraph (complex viz) — FN cases by remoteness ----------
   function drawStream() {
     const host = d3.select("#streamChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
     if (w < 80 || h < 80) return;
 
-    // First Nations only — stream of remoteness layers over the full year range
     const fnRows = state.remoteness.filter(d => d.status === FN);
     const years = state.years;
     const series = REMOTE_ORDER.map(remoteness =>
@@ -634,7 +606,6 @@
         .attr("opacity", 0.92);
     }
 
-    // Hover bands by year for precise tooltips
     g.selectAll("rect.year-hit").data(years).join("rect")
       .attr("class", "year-hit bar-interactive")
       .attr("x", d => x(d) - x.step() / 2)
@@ -675,7 +646,6 @@
     g.append("g").attr("class", "axis").attr("transform", `translate(0,${ih})`)
       .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
-    // Legend
     const leg = g.append("g").attr("transform", `translate(0,${ih + 22})`);
     REMOTE_ORDER.forEach((name, i) => {
       const item = leg.append("g").attr("transform", `translate(${i * 110},0)`);

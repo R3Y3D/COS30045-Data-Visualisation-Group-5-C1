@@ -1,17 +1,6 @@
-/*
- * Page 2 — Who is hurt, and where
- * Four charts: road user, age×sex pyramid, state×year heatmap (complex), remoteness.
- * Shared interactions: year selection and Cases / bed-days-per-admission toggle;
- * click a state row to highlight it. Blank cases are never drawn as 0.
- *
- * AI prompts used: build page 2 matching page 1’s one-screen D3 layout, with the
- * four-panel story, year selector, metric toggle, tooltips, data rules for
- * null / n.p. values, and a W11 heatmap as the complex chart.
- */
 (() => {
   "use strict";
 
-  // ---------- Data loading ----------
   const URLS = {
     roadUser: "Data/Cleaned_CSV/hospitilisation/national_road_user.csv",
     ageGender: "Data/Cleaned_CSV/hospitilisation/national_age_gender.csv",
@@ -25,8 +14,8 @@
     stateYear: [],
     remoteness: [],
     years: [],
-    year: null,          // null = all years
-    metric: "cases",     // "cases" | "stay"
+    year: null,
+    metric: "cases",
     selectedState: null
   };
   const entrance = createEntranceController(1400);
@@ -83,7 +72,6 @@
       d3.select("#headline").text("Data not available");
     });
 
-  // ---------- Interaction ----------
   function bindControls() {
     const rail = d3.select("#yearRail");
     rail.append("button")
@@ -166,7 +154,6 @@
     animateNow = false;
   }
 
-  // ---------- Helpers ----------
   const boxSize = host => {
     const r = host.node().getBoundingClientRect();
     return { w: Math.floor(r.width), h: Math.floor(r.height) };
@@ -176,7 +163,6 @@
     return state.year === null ? rows : rows.filter(d => d.year === state.year);
   }
 
-  /** Aggregate numeric fields; blank / null cases stay null (never coerced to 0). */
   function aggregate(rows, keyFields, valueFields) {
     const map = new Map();
     for (const row of rows) {
@@ -236,7 +222,6 @@
     }
   }
 
-  // ---------- Chart 1: road user horizontal bars ----------
   function drawRoadUser() {
     const host = d3.select("#roadUserChart");
     const { w, h } = boxSize(host);
@@ -305,7 +290,6 @@
       bars.attr("width", d => Number.isFinite(d.value) ? x(d.value) : 0);
     }
 
-    // Stay labels when showing cases; n.p. markers when missing
     const labels = g.selectAll("text.side").data(rows).join("text")
       .attr("class", "side")
       .attr("x", d => (Number.isFinite(d.value) ? x(d.value) : 0) + 6)
@@ -330,7 +314,6 @@
     }
   }
 
-  // ---------- Chart 2: age × sex population pyramid ----------
   function drawAgeSex() {
     const host = d3.select("#ageSexChart");
     const { w, h } = boxSize(host);
@@ -433,14 +416,12 @@
       .call(d3.axisBottom(xFemale).ticks(3).tickFormat(d => useStay ? d3.format(".0f")(d) : d3.format("~s")(d)));
   }
 
-  // ---------- Chart 3: complex heatmap (year × state) — W11 chart type ----------
   function drawStates() {
     const host = d3.select("#stateChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
     if (w < 80 || h < 80) return;
 
-    // Heatmap always uses the full year×state grid; year chip highlights a column
     const cells = state.stateYear.map(d => {
       const cases = Number.isFinite(d.cases) ? d.cases : null;
       const bed_days = Number.isFinite(d.bed_days) ? d.bed_days : null;
@@ -532,7 +513,6 @@
       cellsSel.attr("opacity", cellOpacity);
     }
 
-    // Colour legend
     const legendH = Math.max(40, ih * 0.55);
     const legend = g.append("g").attr("transform", `translate(${iw + 12}, ${(ih - legendH) / 2})`);
     const lgY = d3.scaleLinear().domain(color.domain()).range([legendH, 0]);
@@ -549,14 +529,12 @@
         .tickFormat(d => state.metric === "stay" ? d3.format(".1f")(d) : d3.format("~s")(d)));
   }
 
-  // ---------- Chart 4: remoteness bed days per case ----------
   function drawRemoteness() {
     const host = d3.select("#remotenessChart");
     const { w, h } = boxSize(host);
     host.selectAll("*").remove();
     if (w < 80 || h < 80) return;
 
-    // Remoteness panel always shows stay length (story message), year still applies
     const rows = aggregate(inYear(state.remoteness), ["remoteness"], ["cases", "bed_days"])
       .map(d => ({
         ...d,

@@ -1,9 +1,3 @@
-/*
- * Page 2 layout: headline strip + 2×2 chart grid, fixed to one viewport.
- * AI prompts used: build page 2 in the same one-screen / minmax(0) / SVG-in-box
- * style as page 1, with shared year selector and cases / stay toggle.
- */
-
 .p2-main {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
